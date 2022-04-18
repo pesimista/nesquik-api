@@ -6,7 +6,7 @@ this serves the purpose of being a practice environment, and portfolios project 
 
 ## Running it locally
 
-This project requires some key properties to properly be set up. In development you can set up the `.env` (check the .env.sample) with all the keys and the project will pick them up automatically.
+This project requires some key properties to properly be set up. In development you can set up the `.env` (check the `.env.sample`) with all the keys and the project will pick them up automatically.
 
 To get it running this should be enough:
 
