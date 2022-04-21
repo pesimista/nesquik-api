@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { UserDocument } from '../schemas/users.schema'
 import { JwtPayload } from '../types/jwt.types'
-import { LoginResponse } from '../types/loginResponse.types'
+import { TokenResponse } from '../types/loginResponse.types'
 import { UserService } from './user.service'
 
 @Injectable()
@@ -25,7 +25,7 @@ export class AuthService {
     return user
   }
 
-  login(user: UserDocument): LoginResponse {
+  createToken(user: UserDocument): TokenResponse {
     const payload: JwtPayload = { email: user.email, sub: user.id }
     return {
       accessToken: this.jwt.sign(payload),

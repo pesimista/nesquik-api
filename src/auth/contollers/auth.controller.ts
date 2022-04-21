@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common'
 import { Response } from 'express'
 import { AppConfigService } from 'src/config/providers/configuration.service'
-import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard'
+import { AllowAnonymous, JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard'
 import { LocalAuthGuard } from 'src/shared/guards/local-auth.guard'
 import { RegisterUserDto } from '../dto/register.dto'
 import { AuthService } from '../providers/auth.service'
@@ -28,39 +28,57 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  async register(@Body() dto: RegisterUserDto) {
+  @UseGuards(JwtAuthGuard)
+  async register(
+    @Req() req: RequestJwt,
+    @Body() dto: RegisterUserDto,
+    @Res({ passthrough: true }) response: Response
+  ) {
     try {
-      const res = await this.userService.register(dto)
-      return res
+      const user = await this.userService.register(dto, req.user.id)
+
+      const token = this.authService.createToken(user)
+      response.cookie(this.config.tokenName, token.accessToken)
+      return user
     } catch (error) {
       console.log(error)
       throw error
     }
   }
 
-  @UseGuards(LocalAuthGuard)
   @Post('login')
+  @UseGuards(LocalAuthGuard)
   async login(
     @Req() req: RequestLocal,
     @Res({ passthrough: true }) response: Response
   ): Promise<UserDocument> {
     try {
-      const token = this.authService.login(req.user)
+      const token = this.authService.createToken(req.user)
 
       response.cookie(this.config.tokenName, token.accessToken)
 
       return req.user
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async getUser(@Req() req: RequestJwt): Promise<UserDocument> {
+  @UseGuards(JwtAuthGuard)
+  @AllowAnonymous()
+  async getUser(
+    @Req() req: RequestJwt,
+    @Res({ passthrough: true }) response: Response
+  ): Promise<UserDocument> {
     try {
-      const user = await this.userService.findByEmail(req.user.email)
+      let user
+      if (req.user) {
+        user = await this.userService.findByEmail(req.user.email)
+      } else {
+        user = await this.userService.createAnonymus()
+        const token = this.authService.createToken(user)
+        response.cookie(this.config.tokenName, token.accessToken)
+      }
 
       if (!user) {
         throw new HttpException(

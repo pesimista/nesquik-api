@@ -42,7 +42,6 @@ export class User {
 
   @Prop({
     type: String,
-    required: true,
     trim: true,
     minlength: 8,
     validate(value) {
@@ -71,6 +70,9 @@ export class User {
   @Prop({ type: String })
   salt: string
 
+  @Prop({ type: Date, default: new Date() })
+  lastAccess: Date
+
   isPasswordMatch: (pass: string) => Promise<boolean>
 }
 
@@ -92,10 +94,14 @@ UserSchema.methods.isPasswordMatch = function (
   return bcrypt.compare(password, user.password)
 }
 
-UserSchema.statics.isEmailTaken = async function (
-  email: string,
-  excludeUserId?: string
-): Promise<boolean> {
-  const user = await this.findOne({ email, _id: { $ne: excludeUserId } })
-  return Boolean(user)
-}
+// UserSchema.statics.isEmailTaken = async function (
+//   email: string,
+//   excludeUserId?: string
+// ): Promise<boolean> {
+//   const user = await this.findOne({
+//     email,
+//     _id: { $ne: excludeUserId },
+//     isAnonymous: false,
+//   })
+//   return Boolean(user)
+// }
