@@ -7,6 +7,7 @@ import { AppConfigService } from './config/providers/configuration.service'
 import { MarketsModule } from './markets/markets.module'
 import { ProductsModule } from './products/products.module'
 import { SharedModule } from './shared/shared.module'
+import { AuthModule } from './auth/auth.module'
 
 @Module({
   imports: [
@@ -15,7 +16,6 @@ import { SharedModule } from './shared/shared.module'
       imports: [AppConfigModule],
       inject: [AppConfigService],
       useFactory: (config: AppConfigService): MongooseModuleOptions => {
-        console.log(config.database.uri)
         return {
           uri: config.database.uri,
         }
@@ -26,6 +26,7 @@ import { SharedModule } from './shared/shared.module'
     ConfigModule,
     CategoriesModule,
     SharedModule,
+    AuthModule,
   ],
   controllers: [],
 })

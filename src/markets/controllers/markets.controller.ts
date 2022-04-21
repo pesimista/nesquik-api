@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Post } from '@nestjs/common'
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common'
+import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard'
 import { PostMarketDto } from '../dto/postMarket.dto'
 import { MarketsService } from '../providers/markets.service'
 import { Market } from '../schemas/market.schema'
@@ -8,6 +9,7 @@ export class MarketsController {
   constructor(private service: MarketsService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async findAll(): Promise<Market[]> {
     try {
       return this.service.getAll()

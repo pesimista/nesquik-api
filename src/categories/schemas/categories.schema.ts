@@ -1,18 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document } from 'mongoose'
 import { Category as CategoryType } from 'nesquik-types'
+import { SchemaOptions } from 'src/shared/schemas/schemas-options'
 
 export type CategoryDocument = Category & Document
 
-@Schema({
-  toJSON: {
-    virtuals: true,
-    versionKey: false,
-    transform: (doc, ret) => {
-      delete ret._id
-    },
-  },
-})
+@Schema(SchemaOptions)
 export class Category implements CategoryType {
   @Prop({ type: String })
   categoryID: string

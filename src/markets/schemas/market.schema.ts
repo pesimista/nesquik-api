@@ -9,18 +9,11 @@ import {
   Schedule,
 } from 'nesquik-types'
 import { BannerSchema } from 'src/shared/schemas/banners.schema'
+import { SchemaOptions } from 'src/shared/schemas/schemas-options'
 
 export type MarketDocument = Market & Document
 
-@Schema({
-  toJSON: {
-    virtuals: true,
-    versionKey: false,
-    transform: (doc, ret) => {
-      delete ret._id
-    },
-  },
-})
+@Schema(SchemaOptions)
 export class Market implements Partial<MarketType> {
   @Prop({ required: true, type: String })
   name: string

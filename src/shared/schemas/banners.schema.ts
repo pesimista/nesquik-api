@@ -1,18 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document } from 'mongoose'
 import { Banner as BannerType } from 'nesquik-types'
+import { SchemaOptions } from './schemas-options'
 
 export type BannerDocument = Banner & Document & { priority: number }
 
-@Schema({
-  toJSON: {
-    virtuals: true,
-    versionKey: false,
-    transform: (doc, ret) => {
-      delete ret._id
-    },
-  },
-})
+@Schema(SchemaOptions)
 export class Banner implements Partial<BannerType> {
   @Prop({ type: String })
   bannerID: string
