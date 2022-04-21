@@ -43,16 +43,13 @@ export class AuthController {
   async login(
     @Req() req: RequestLocal,
     @Res({ passthrough: true }) response: Response
-  ) {
+  ): Promise<UserDocument> {
     try {
       const token = this.authService.login(req.user)
 
       response.cookie(this.config.tokenName, token.accessToken)
 
-      return {
-        user: req.user,
-        accessToken: token.accessToken,
-      }
+      return req.user
     } catch (error) {
       console.log(error)
       throw error
