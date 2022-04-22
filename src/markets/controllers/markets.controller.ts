@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common'
-import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard'
+import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard'
 import { PostMarketDto } from '../dto/postMarket.dto'
 import { MarketsService } from '../providers/markets.service'
 import { Market } from '../schemas/market.schema'

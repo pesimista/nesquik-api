@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core'
 import { AuthGuard } from '@nestjs/passport'
 import { Request } from 'express'
 import { Observable } from 'rxjs'
-import { AppConfigService } from 'src/config/providers/configuration.service'
+import { AppConfigService } from '../../config/providers/configuration.service'
 
 export const ALLOW_ANONYMOUS_META_KEY = 'allowAnonymous'
 export const AllowAnonymous = () => SetMetadata(ALLOW_ANONYMOUS_META_KEY, true)

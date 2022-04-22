@@ -7,7 +7,7 @@ import {
   Strategy,
   StrategyOptions,
 } from 'passport-jwt'
-import { AppConfigService } from 'src/config/providers/configuration.service'
+import { AppConfigService } from '../../config/providers/configuration.service'
 import { JwtPayload } from '../types/jwt.types'
 
 @Injectable()

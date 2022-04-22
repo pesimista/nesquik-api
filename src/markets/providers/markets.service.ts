@@ -6,8 +6,8 @@ import { PostMarketDto } from '../dto/postMarket.dto'
 import {
   Category,
   CategoryDocument,
-} from 'src/categories/schemas/categories.schema'
-import { Banner, BannerDocument } from 'src/shared/schemas/banners.schema'
+} from '../../categories/schemas/categories.schema'
+import { Banner, BannerDocument } from '../../shared/schemas/banners.schema'
 
 @Injectable()
 export class MarketsService {

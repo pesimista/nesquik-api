@@ -2,7 +2,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import * as bcrypt from 'bcrypt'
 import mongoose, { Document } from 'mongoose'
-import { SchemaOptions } from 'src/shared/schemas/schemas-options'
+import { SchemaOptions } from '../../shared/schemas/schemas-options'
 import { Model } from 'mongoose'
 
 export type UserDocument = User & Document

@@ -1,12 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { RegisterUserDto } from '../dto/register.dto'
-import { User, UserDocument, UserModel } from '../schemas/users.schema'
 import * as crypto from 'crypto'
+import { Model } from 'mongoose'
+import { RegisterUserDto } from '../dto/register.dto'
+import { User, UserDocument } from '../schemas/users.schema'
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private model: UserModel) {}
+  constructor(@InjectModel(User.name) private model: Model<UserDocument>) {}
 
   async findByEmail(email: string): Promise<UserDocument> {
     const user = await this.model.findOne({ email })
@@ -29,7 +30,7 @@ export class UserService {
       if (!doc.isAnonymous) {
         throw new HttpException(
           'This user is not anonymous',
-          HttpStatus.UNAUTHORIZED
+          HttpStatus.CONFLICT
         )
       }
 
@@ -40,7 +41,6 @@ export class UserService {
       doc.lastAccess = new Date()
       await doc.save()
 
-      console.log(doc)
       return doc
     } catch (error) {
       // email not unique
@@ -73,13 +73,14 @@ export class UserService {
     }
   }
 
-  async deleteAnonymous(anonymousID: string): Promise<void> {
+  async deleteAnonymous(anonymousID: string): Promise<boolean> {
     const doc = await this.model.findById(anonymousID)
 
     if (!doc.isAnonymous) {
-      return
+      return false
     }
 
-    return doc.delete()
+    await doc.delete()
+    return true
   }
 }
