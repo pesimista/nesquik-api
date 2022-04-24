@@ -14,7 +14,7 @@ export class AppConfigService {
     const minutes = process.env.EXPIRATION_MINUTES || '1'
 
     return {
-      secret: process.env.KEY_SECRET,
+      secret: process.env.KEY_SECRET || 'secret',
       signOptions: {
         expiresIn: `${minutes}m`,
       },
