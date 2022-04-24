@@ -87,7 +87,16 @@
     ],
     "rootDir": "src",
     "coveragePathIgnorePatterns": [
-      "schema.ts"
+      ".module.ts",
+      "main.ts",
+      ".dto.ts",
+      ".enum.ts",
+      ".schema.ts",
+      ".strategy.ts",
+      ".mock.ts",
+      "/main.ts",
+      "/console.ts",
+      "/mocks"
     ],
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {

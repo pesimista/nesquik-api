@@ -24,13 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   private static extractJWT(cookie: string): JwtFromRequestFunction {
-    return (request: Request) => {
-      if (request.cookies && request.cookies[cookie]) {
-        return request.cookies[cookie]
-      }
-
-      return null
-    }
+    return (request: Request) => request.cookies[cookie]
   }
 
   validate(payload: JwtPayload): Partial<JwtPayload> {

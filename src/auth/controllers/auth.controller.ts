@@ -44,7 +44,7 @@ export class AuthController {
       response.cookie(this.config.tokenName, token.accessToken)
       return user
     } catch (error) {
-      console.log(error)
+      // space to add error login to sentry or any other logger service
       throw error
     }
   }
@@ -55,15 +55,11 @@ export class AuthController {
     @Req() req: RequestLocal,
     @Res({ passthrough: true }) response: Response
   ): Promise<UserDocument> {
-    try {
-      const token = this.authService.createToken(req.user)
+    const token = this.authService.createToken(req.user)
 
-      response.cookie(this.config.tokenName, token.accessToken)
+    response.cookie(this.config.tokenName, token.accessToken)
 
-      return req.user
-    } catch (error) {
-      throw error
-    }
+    return req.user
   }
 
   @Get('profile')
@@ -85,13 +81,14 @@ export class AuthController {
 
       if (!user) {
         throw new HttpException(
-          'Incorrect email or password',
+          'invalid token',
           HttpStatus.UNPROCESSABLE_ENTITY
         )
       }
 
       return user
     } catch (error) {
+      // space to add error login to sentry or any other logger service
       throw error
     }
   }

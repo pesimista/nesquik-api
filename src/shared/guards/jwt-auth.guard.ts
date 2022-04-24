@@ -24,7 +24,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     )
 
     const { cookies } = context.switchToHttp().getRequest<Request>()
-
     if (!isAnonymousAllowed || cookies[this.config.tokenName]) {
       return super.canActivate(context)
     }
