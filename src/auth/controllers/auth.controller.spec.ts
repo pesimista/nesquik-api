@@ -1,11 +1,6 @@
-import {
-  Header,
-  HttpException,
-  HttpStatus,
-  ValidationPipe,
-} from '@nestjs/common'
+import { HttpException, HttpStatus, ValidationPipe } from '@nestjs/common'
 import { NestApplication } from '@nestjs/core'
-import { JwtModule, JwtService } from '@nestjs/jwt'
+import { JwtModule } from '@nestjs/jwt'
 import { Test, TestingModule } from '@nestjs/testing'
 import * as cookieParser from 'cookie-parser'
 import * as request from 'supertest'
@@ -21,7 +16,6 @@ describe('AuthController (e2e)', () => {
   let controller: AuthController
   let app: NestApplication
   let authMock: AuthService
-  let jwt: JwtService
 
   let accessToken = ''
 
@@ -58,7 +52,6 @@ describe('AuthController (e2e)', () => {
 
     controller = module.get<AuthController>(AuthController)
     authMock = module.get<AuthService>(AuthService)
-    jwt = module.get<JwtService>(JwtService)
 
     app = module.createNestApplication()
 
@@ -149,8 +142,9 @@ describe('AuthController (e2e)', () => {
     it('should throw an error if register fails', async () => {
       const userDTO: RegisterUserDto = {
         email: 'registered@mail.com',
-        name: 'Texas Red',
+        name: 'Texas',
         password: 'secretpassword',
+        lastName: 'Red',
       }
 
       UserServiceMock.register.mockRejectedValue(
@@ -174,8 +168,9 @@ describe('AuthController (e2e)', () => {
     it('should update an anonymous user to be non-anonymous', async () => {
       const userDTO: RegisterUserDto = {
         email: 'registered@mail.com',
-        name: 'Texas Red',
+        name: 'Texas',
         password: 'secretpassword',
+        lastName: 'Red',
       }
       const registeredMock = {
         ...userDTO,

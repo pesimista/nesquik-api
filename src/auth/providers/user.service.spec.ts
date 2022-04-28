@@ -3,6 +3,7 @@ import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { fail } from 'assert'
 import { Model } from 'mongoose'
+import { RegisterUserDto } from '../dto/register.dto'
 import { User, UserDocument, UserModel } from '../schemas/users.schema'
 import { UserService } from './user.service'
 
@@ -38,10 +39,11 @@ describe('UserService', () => {
 
   describe('#register', () => {
     it('should throw an error if the user is not anonymus', async () => {
-      const dto = {
-        name: 'test',
+      const dto: RegisterUserDto = {
+        name: 'texas',
         email: 'something@nesquik.com',
         password: 'secretpassword',
+        lastName: 'red',
       }
 
       const user = {
@@ -67,10 +69,11 @@ describe('UserService', () => {
     })
 
     it('should throw an error if the email is already taken', async () => {
-      const dto = {
-        name: 'test',
+      const dto: RegisterUserDto = {
+        name: 'texas',
         email: 'something@nesquik.com',
         password: 'secretpassword',
+        lastName: 'red',
       }
 
       const user = {
@@ -98,10 +101,11 @@ describe('UserService', () => {
     })
 
     it('should create the user and return it with isAnonymous as false', async () => {
-      const dto = {
-        name: 'test',
+      const dto: RegisterUserDto = {
+        name: 'texas',
         email: 'something@nesquik.com',
         password: 'secretpassword',
+        lastName: 'red',
       }
 
       const user = {

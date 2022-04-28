@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-this-alias */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import * as bcrypt from 'bcrypt'
-import mongoose, { Document } from 'mongoose'
-import { SchemaOptions } from '../../shared/schemas/schemas-options'
-import { Model } from 'mongoose'
+import mongoose, { Document, Model } from 'mongoose'
+import { User as UserType } from 'nesquik-types'
+import { SchemaOptions } from '../../utils/schemas/schemas-options'
 
 export type UserDocument = User & Document
 export type UserModel = Model<UserDocument> & {
@@ -23,13 +23,35 @@ const toJSON: mongoose.ToObjectOptions = {
   ...SchemaOptions,
   toJSON,
 })
-export class User {
+export class User implements Partial<UserType> {
   @Prop({
     type: String,
     required: true,
     trim: true,
   })
   name: string
+
+  @Prop({
+    type: String,
+    required: true,
+    trim: true,
+  })
+  lastName: string
+
+  @Prop({ type: String })
+  nickname: string
+
+  @Prop({
+    type: Number,
+    default: 0,
+  })
+  points: number
+
+  @Prop({ type: String, default: 0 })
+  pointsEarned: number
+
+  @Prop({ type: String, default: 0 })
+  pointsSpent: number
 
   @Prop({
     type: String,
@@ -84,6 +106,10 @@ UserSchema.pre<UserDocument>('save', async function () {
     const salt = await bcrypt.genSalt(8)
     user.salt = salt
     user.password = await bcrypt.hash(user.password, salt)
+  }
+
+  if (user.isModified('name') || user.isModified('lastName')) {
+    user.nickname = `${user.name} ${user.lastName}`
   }
 })
 

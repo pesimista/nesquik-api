@@ -11,11 +11,8 @@ import {
 } from '@nestjs/common'
 import { Response } from 'express'
 import { AppConfigService } from '../../config/providers/configuration.service'
-import {
-  AllowAnonymous,
-  JwtAuthGuard,
-} from '../../shared/guards/jwt-auth.guard'
-import { LocalAuthGuard } from '../../shared/guards/local-auth.guard'
+import { AllowAnonymous, JwtAuthGuard } from '../../utils/guards/jwt-auth.guard'
+import { LocalAuthGuard } from '../../utils/guards/local-auth.guard'
 import { RegisterUserDto } from '../dto/register.dto'
 import { AuthService } from '../providers/auth.service'
 import { UserService } from '../providers/user.service'

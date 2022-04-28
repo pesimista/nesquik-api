@@ -35,6 +35,7 @@ export class UserService {
       }
 
       doc.name = user.name
+      doc.lastName = user.lastName
       doc.email = user.email
       doc.password = user.password
       doc.isAnonymous = false
