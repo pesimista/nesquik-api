@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt'
 import { Test, TestingModule } from '@nestjs/testing'
 import * as cookieParser from 'cookie-parser'
 import * as request from 'supertest'
+import { UserServiceMock } from '../../../test/mocks/user.service.mock'
 import { AppConfigService } from '../../config/providers/configuration.service'
 import { RegisterUserDto } from '../dto/register.dto'
 import { AuthService } from '../providers/auth.service'
@@ -18,12 +19,6 @@ describe('AuthController (e2e)', () => {
   let authMock: AuthService
 
   let accessToken = ''
-
-  const UserServiceMock = {
-    createAnonymus: jest.fn(),
-    findByEmail: jest.fn(),
-    register: jest.fn(),
-  }
 
   const AppConfigServiceMock = {
     tokenName: 'nesquik',

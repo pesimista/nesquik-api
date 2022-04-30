@@ -8,8 +8,8 @@ import {
   MarketImages,
   Schedule,
 } from 'nesquik-types'
-import { BannerSchema } from '../../shared/schemas/banners.schema'
-import { SchemaOptions } from '../../shared/schemas/schemas-options'
+import { BannerSchema } from '../../utils/schemas/banners.schema'
+import { SchemaOptions } from '../../utils/schemas/schemas-options'
 
 export type MarketDocument = Market & Document
 
@@ -20,6 +20,9 @@ export class Market implements Partial<MarketType> {
 
   @Prop({ type: String })
   address: string
+
+  @Prop({ type: String })
+  addressName: string
 
   @Prop({})
   bikeDistance: number
@@ -46,18 +49,12 @@ export class Market implements Partial<MarketType> {
   hasPromo: boolean
 
   @Prop({ type: Boolean })
-  isDeliveryOnly: boolean
-
-  @Prop({ type: Boolean })
   isOnlyQuik: boolean
-
-  @Prop({ type: Boolean })
-  isPremium: boolean
 
   @Prop({ required: true, type: String })
   logo: string
 
-  @Prop({ type: String })
+  @Prop({ type: String, unique: true })
   marketID: string
 
   @Prop({ type: Number })
@@ -76,33 +73,24 @@ export class Market implements Partial<MarketType> {
     type: [
       {
         initialTime: { type: String },
-        onlyAllowMoto: { type: Boolean },
-        statusInRange: { type: String },
         finalTime: { type: String },
-        finalDeliveryTime: { type: Number },
-        allowFree: { type: Boolean },
-        statusOutOfRange: { type: String },
-        initialDeliveryTime: { type: String },
-        deliveryFactor: { type: Number },
       },
     ],
   })
-  schedule: Schedule[]
+  schedule: Partial<Schedule>[]
 
   @Prop({ type: [BannerSchema] })
   marketing: Banner[]
 
   @Prop({
-    type: [
-      {
-        profile: { type: String },
-        header: { type: String },
-        showcaseBackgroundImage: { type: String },
-        backgroundImage: { type: String },
-        marketing: { type: [String] },
-        headerBackgroundColor: { type: String },
-      },
-    ],
+    type: {
+      profile: { type: String },
+      header: { type: String },
+      showcaseBackgroundImage: { type: String },
+      backgroundImage: { type: String },
+      marketing: { type: [String] },
+      headerBackgroundColor: { type: String },
+    },
   })
   images: MarketImages
 

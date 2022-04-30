@@ -1,8 +1,18 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common'
-import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard'
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common'
+import { JwtAuthGuard } from '../../utils/guards/jwt-auth.guard'
+import { ImportMarketDto } from '../dto/importMaket.dto'
 import { PostMarketDto } from '../dto/postMarket.dto'
 import { MarketsService } from '../providers/markets.service'
-import { Market } from '../schemas/market.schema'
+import { Market, MarketDocument } from '../schemas/market.schema'
 
 @Controller('markets')
 export class MarketsController {
@@ -11,21 +21,34 @@ export class MarketsController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async findAll(): Promise<Market[]> {
+    return this.service.getAllMarkets()
+  }
+
+  @Get(':storeid')
+  @UseGuards(JwtAuthGuard)
+  async findMarket(@Param('storeid') id: string): Promise<MarketDocument> {
     try {
-      return this.service.getAll()
+      const doc = await this.service.getSingleMarket(id)
+
+      if (!doc) {
+        throw new HttpException('Market not found', HttpStatus.NOT_FOUND)
+      }
+
+      return doc
     } catch (error) {
-      console.error(error)
       throw error
     }
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async createMarket(@Body() dto: PostMarketDto): Promise<Market> {
-    try {
-      return this.service.createOrUpdate(dto)
-    } catch (error) {
-      console.error(error)
-      throw error
-    }
+    return this.service.createMarket(dto)
+  }
+
+  @Post('import')
+  @UseGuards(JwtAuthGuard)
+  async importMarket(@Body() dto: ImportMarketDto): Promise<Market> {
+    return this.service.importMarket(dto)
   }
 }

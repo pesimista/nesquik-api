@@ -47,10 +47,10 @@ export class User implements Partial<UserType> {
   })
   points: number
 
-  @Prop({ type: String, default: 0 })
+  @Prop({ type: Number, default: 0 })
   pointsEarned: number
 
-  @Prop({ type: String, default: 0 })
+  @Prop({ type: Number, default: 0 })
   pointsSpent: number
 
   @Prop({

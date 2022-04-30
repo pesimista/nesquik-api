@@ -1,95 +1,155 @@
-import { Model } from 'mongoose'
-import { Injectable } from '@nestjs/common'
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Market, MarketDocument } from '../schemas/market.schema'
-import { PostMarketDto } from '../dto/postMarket.dto'
+import { Model } from 'mongoose'
+import { Schedule } from 'nesquik-types'
+import { Logger } from 'winston'
 import {
   Category,
   CategoryDocument,
 } from '../../categories/schemas/categories.schema'
-import { Banner, BannerDocument } from '../../shared/schemas/banners.schema'
+import { Banner, BannerDocument } from '../../utils/schemas/banners.schema'
+import { ImportMarketDto } from '../dto/importMaket.dto'
+import { PostMarketDto } from '../dto/postMarket.dto'
+import { Market, MarketDocument } from '../schemas/market.schema'
+
+type FullHourType = { hour: number | string; minutes: number | string }
 
 @Injectable()
 export class MarketsService {
   constructor(
+    @Inject('winston') private logger: Logger,
     @InjectModel(Market.name) private model: Model<MarketDocument>,
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
     @InjectModel(Banner.name) private bannerModel: Model<BannerDocument>
   ) {}
 
-  async getAll(): Promise<Market[]> {
-    return this.model.find().populate('categories')
+  async getAllMarkets(): Promise<MarketDocument[]> {
+    return this.model.find().populate('categories').sort('order')
   }
 
   async getSingleMarket(marketID: string): Promise<MarketDocument> {
-    return this.model.findOne({ marketID })
-  }
-
-  async createOrUpdate(dto: PostMarketDto): Promise<Market> {
-    const market = await this.getSingleMarket(dto.marketID)
-
-    if (market) {
-      console.log(`updating ${dto.marketID} ${dto.name}`)
-      return this.update(market, dto)
+    let doc
+    if (marketID.length === 24) {
+      this.logger.info('searching market by doc.id', { marketID })
+      doc = await this.model.findById(marketID)
+      return doc
     }
 
-    console.log(`creating ${dto.marketID} ${dto.name}`)
-    return this.create(dto)
+    this.logger.info('searching market by doc.id', { marketID })
+    doc = await this.model.findOne({ marketID })
+    return doc
   }
 
-  async create({
-    ranking,
-    categories,
-    schedule,
-    ...market
-  }: PostMarketDto): Promise<Market> {
-    const categoryPromise = categories['categoriesDescriptions'].map((item) =>
-      this.categoryModel.findOne({ categoryID: item.categoryID })
+  async createMarket(dto: PostMarketDto): Promise<MarketDocument> {
+    const doc = await this.getSingleMarket(dto.marketID)
+
+    if (doc) {
+      throw new HttpException(
+        'Market with given marketID already exists',
+        HttpStatus.CONFLICT
+      )
+    }
+
+    const categoryPromise = dto.categoriesIds.map((item) =>
+      this.categoryModel.findById(item)
     )
 
     const categoryItems = await Promise.all(categoryPromise)
 
-    const scheduleItems = schedule.map((item) => {
-      const initialTime = this.getFullHour(item.initialTime)
-      const finalTime = this.getFullHour(item.finalTime)
+    // const scheduleItems = schedule.map((item) => {
+    //   const initialTime = this.getFullHour(item.initialTime)
+    //   const finalTime = this.getFullHour(item.finalTime)
 
-      return {
-        ...item,
-        initialTime: `${initialTime.hour}:${initialTime.minutes}`,
-        finalTime: `${finalTime.hour}:${finalTime.minutes}`,
-      }
-    })
+    //   return {
+    //     ...item,
+    //     initialTime: `${initialTime.hour}:${initialTime.minutes}`,
+    //     finalTime: `${finalTime.hour}:${finalTime.minutes}`,
+    //   }
+    // })
 
     const marketDoc = this.model.create({
-      ...market,
-      order: ranking,
-      hasPromo: Boolean(market.hasPromo),
+      ...dto,
       categories: categoryItems.filter(Boolean),
-      schedule: scheduleItems,
+      marketing: [],
+      schedule: [],
     })
 
     return marketDoc
   }
 
-  async update(
-    doc: MarketDocument,
-    { ranking, categories }: PostMarketDto
-  ): Promise<Market> {
-    const categoryPromise = categories['categoriesDescriptions'].map((item) =>
+  async parseQuikMaket({
+    ranking,
+    categories,
+    schedule,
+    ...market
+  }: ImportMarketDto): Promise<Partial<Market>> {
+    const categoryPromise = categories.categoriesDescriptions.map((item) =>
       this.categoryModel.findOne({ categoryID: item.categoryID })
     )
 
     const categoryItems = await Promise.all(categoryPromise)
 
-    doc.categories = categoryItems.filter(Boolean)
-    doc.order = ranking
-    doc.marketing = doc.marketing.map((item) => new this.bannerModel(item))
-    await doc.save()
+    const scheduleItems: Partial<Schedule>[] = schedule.map((item) => {
+      const initialTime = this.getFullHour(item.initialTime, false)
+      const finalTime = this.getFullHour(item.finalTime, false)
 
+      return {
+        initialTime: `${initialTime.hour}:${initialTime.minutes}`,
+        finalTime: `${finalTime.hour}:${finalTime.minutes}`,
+      }
+    })
+
+    const marketing = market.marketing?.map((item) => {
+      return new this.bannerModel({
+        ...item,
+        queryParams: {
+          storeid: market.marketID,
+          productID: item.queryParams.dialog?.split('~')[1],
+        },
+      })
+    })
+
+    return {
+      address: market.address,
+      addressName: market.addressName,
+      bikeDistance: market.bikeDistance,
+      coordinates: market.coordinates,
+      estimatedTime: market.estimatedTime,
+      hasFreeDelivery: market.hasFreeDelivery,
+      images: market.images,
+      isOnlyQuik: market.isOnlyQuik,
+      logo: market.logo,
+      marketID: market.marketID,
+      maxDeliveryRange: market.maxDeliveryRange,
+      name: market.name,
+      radiusDistance: market.radiusDistance,
+      rating: market.rating,
+      order: ranking,
+      marketing,
+      hasPromo: Boolean(market.hasPromo),
+      categories: categoryItems.filter(Boolean),
+      schedule: scheduleItems,
+    }
+  }
+
+  async importMarket(dto: ImportMarketDto): Promise<MarketDocument> {
+    const context = { marketID: dto.marketID, name: dto.name }
+
+    const market = await this.parseQuikMaket(dto)
+    let doc = await this.getSingleMarket(dto.marketID)
+
+    if (doc) {
+      this.logger.info('updating market doc', context)
+      await doc.updateOne(market)
+      return doc
+    }
+
+    this.logger.info('creating market doc', context)
+    doc = await this.model.create(market)
     return doc
   }
 
-  getFullHour(value: string): { hour: number; minutes: number } {
+  getFullHour(value: string, asNumber = true): FullHourType {
     const [time, term] = value.toLocaleLowerCase().split(' ')
     const items = time.split(':').map(parseFloat)
 
@@ -97,6 +157,12 @@ export class MarketsService {
       items[0] += 12
     }
 
-    return { hour: items[0], minutes: items[1] }
+    const response: FullHourType = { hour: items[0], minutes: items[1] }
+    if (!asNumber) {
+      response.hour = response.hour.toString().padStart(2, '0')
+      response.minutes = response.minutes.toString().padStart(2, '0')
+    }
+
+    return response
   }
 }
