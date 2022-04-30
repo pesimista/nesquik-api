@@ -9,7 +9,7 @@ import { AuthController } from './controllers/auth.controller'
 import { AuthService } from './providers/auth.service'
 import { LocalStrategy } from './strategies/local.strategy'
 import { UserService } from './providers/user.service'
-import { User, UserSchema } from './schemas/users.schema'
+import { User, UserSchema } from '../utils/schemas/users.schema'
 import { JwtStrategy } from './strategies/jwt.strategy'
 
 @Module({

@@ -12,7 +12,7 @@ import { JwtAuthGuard } from '../../utils/guards/jwt-auth.guard'
 import { ImportMarketDto } from '../dto/importMaket.dto'
 import { PostMarketDto } from '../dto/postMarket.dto'
 import { MarketsService } from '../providers/markets.service'
-import { Market, MarketDocument } from '../schemas/market.schema'
+import { Market, MarketDocument } from '../../utils/schemas/market.schema'
 
 @Controller('markets')
 export class MarketsController {

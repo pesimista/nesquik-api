@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { UserDocument } from '../schemas/users.schema'
+import { UserDocument } from '../../utils/schemas/users.schema'
 import { JwtPayload } from '../types/jwt.types'
 import { TokenResponse } from '../types/loginResponse.types'
 import { UserService } from './user.service'

@@ -8,10 +8,10 @@ import { MarketMock, QuikMarketMock } from '../../../test/mocks/market.mock'
 import {
   Category,
   CategoryDocument,
-} from '../../categories/schemas/categories.schema'
+} from '../../utils/schemas/categories.schema'
 import { Banner } from '../../utils/schemas/banners.schema'
 import { PostMarketDto } from '../dto/postMarket.dto'
-import { Market, MarketDocument } from '../schemas/market.schema'
+import { Market, MarketDocument } from '../../utils/schemas/market.schema'
 import { MarketsService } from './markets.service'
 
 type MarketModel = Model<MarketDocument>

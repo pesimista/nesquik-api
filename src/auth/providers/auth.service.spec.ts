@@ -2,7 +2,7 @@ import { HttpException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Test, TestingModule } from '@nestjs/testing'
 import { fail } from 'assert'
-import { UserDocument } from '../schemas/users.schema'
+import { UserDocument } from '../../utils/schemas/users.schema'
 import { AuthService } from './auth.service'
 import { UserService } from './user.service'
 

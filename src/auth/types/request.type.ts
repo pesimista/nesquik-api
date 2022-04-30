@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import { UserDocument } from '../schemas/users.schema'
+import { UserDocument } from '../../utils/schemas/users.schema'
 import { JwtPayload } from './jwt.types'
 
 export type RequestLocal = Request & { user?: UserDocument }

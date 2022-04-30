@@ -6,11 +6,11 @@ import { Logger } from 'winston'
 import {
   Category,
   CategoryDocument,
-} from '../../categories/schemas/categories.schema'
+} from '../../utils/schemas/categories.schema'
 import { Banner, BannerDocument } from '../../utils/schemas/banners.schema'
 import { ImportMarketDto } from '../dto/importMaket.dto'
 import { PostMarketDto } from '../dto/postMarket.dto'
-import { Market, MarketDocument } from '../schemas/market.schema'
+import { Market, MarketDocument } from '../../utils/schemas/market.schema'
 
 type FullHourType = { hour: number | string; minutes: number | string }
 

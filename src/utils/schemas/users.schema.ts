@@ -3,7 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import * as bcrypt from 'bcrypt'
 import mongoose, { Document, Model } from 'mongoose'
 import { User as UserType } from 'nesquik-types'
-import { SchemaOptions } from '../../utils/schemas/schemas-options'
+import { SchemaOptions } from './schemas-options'
 
 export type UserDocument = User & Document
 export type UserModel = Model<UserDocument> & {

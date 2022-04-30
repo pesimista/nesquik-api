@@ -8,8 +8,8 @@ import {
   MarketImages,
   Schedule,
 } from 'nesquik-types'
-import { BannerSchema } from '../../utils/schemas/banners.schema'
-import { SchemaOptions } from '../../utils/schemas/schemas-options'
+import { BannerSchema } from './banners.schema'
+import { SchemaOptions } from './schemas-options'
 
 export type MarketDocument = Market & Document
 

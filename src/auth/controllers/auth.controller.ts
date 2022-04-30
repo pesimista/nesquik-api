@@ -16,7 +16,7 @@ import { LocalAuthGuard } from '../../utils/guards/local-auth.guard'
 import { RegisterUserDto } from '../dto/register.dto'
 import { AuthService } from '../providers/auth.service'
 import { UserService } from '../providers/user.service'
-import { UserDocument } from '../schemas/users.schema'
+import { UserDocument } from '../../utils/schemas/users.schema'
 import { RequestJwt, RequestLocal } from '../types/request.type'
 
 @Controller('auth')

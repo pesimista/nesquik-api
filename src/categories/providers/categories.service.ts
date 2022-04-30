@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { PostCategoryDto } from '../dto/postCategory.dto'
-import { Category, CategoryDocument } from '../schemas/categories.schema'
+import {
+  Category,
+  CategoryDocument,
+} from '../../utils/schemas/categories.schema'
 
 @Injectable()
 export class CategoriesService {
@@ -19,9 +22,8 @@ export class CategoriesService {
     const doc = await this.model.findOne({ categoryID: dto.categoryID })
 
     if (doc) {
-      doc.parent = dto.parent
-      doc.save()
-      return doc
+      // doc.parent = dto.?parent
+      return doc.updateOne(dto)
       // throw new HttpException(
       //   'the category already exists',
       //   HttpStatus.CONFLICT

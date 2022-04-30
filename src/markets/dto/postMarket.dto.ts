@@ -8,7 +8,7 @@ import {
   IsString,
 } from 'class-validator'
 import { Coordinates, MarketImages } from 'nesquik-types'
-import { Market } from '../schemas/market.schema'
+import { Market } from '../../utils/schemas/market.schema'
 
 class ImagesDto implements MarketImages {
   @IsString()

@@ -4,7 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { fail } from 'assert'
 import { Model } from 'mongoose'
 import { RegisterUserDto } from '../dto/register.dto'
-import { User, UserDocument, UserModel } from '../schemas/users.schema'
+import { User, UserDocument, UserModel } from '../../utils/schemas/users.schema'
 import { UserService } from './user.service'
 
 describe('UserService', () => {

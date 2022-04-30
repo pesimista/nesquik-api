@@ -1,13 +1,10 @@
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
-import {
-  Category,
-  CategorySchema,
-} from '../categories/schemas/categories.schema'
+import { Category, CategorySchema } from '../utils/schemas/categories.schema'
 import { Banner, BannerSchema } from '../utils/schemas/banners.schema'
 import { MarketsController } from './controllers/markets.controller'
 import { MarketsService } from './providers/markets.service'
-import { Market, MarketSchema } from './schemas/market.schema'
+import { Market, MarketSchema } from '../utils/schemas/market.schema'
 
 @Module({
   imports: [

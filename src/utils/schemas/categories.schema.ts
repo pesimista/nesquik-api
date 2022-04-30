@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document } from 'mongoose'
 import { Category as CategoryType } from 'nesquik-types'
-import { SchemaOptions } from '../../shared/schemas/schemas-options'
+import { SchemaOptions } from './schemas-options'
 
 export type CategoryDocument = Category & Document
 
