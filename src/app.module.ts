@@ -9,7 +9,6 @@ import { AppConfigModule } from './config/config.module'
 import { AppConfigService } from './config/providers/configuration.service'
 import { MarketsModule } from './markets/markets.module'
 import { ProductsModule } from './products/products.module'
-import { SharedModule } from './utils/shared.module'
 
 @Module({
   imports: [
@@ -38,7 +37,6 @@ import { SharedModule } from './utils/shared.module'
     ProductsModule,
     ConfigModule,
     CategoriesModule,
-    SharedModule,
     AuthModule,
   ],
   controllers: [],
