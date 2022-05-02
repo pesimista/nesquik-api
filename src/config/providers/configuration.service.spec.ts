@@ -28,6 +28,22 @@ describe('AppConfigService', () => {
     })
   })
 
+  describe('#parentCategory', () => {
+    it('should return the default date for defaultParentCategory', () => {
+      const parent = service.defaultParentCategory
+
+      expect(parent).toEqual('R6JtZlEk1IwViiOvRbKM')
+    })
+
+    it('should return the data for database', () => {
+      process.env.PARENT_CATEGORY = 'someotherid'
+
+      const parent = service.defaultParentCategory
+
+      expect(parent).toEqual('someotherid')
+    })
+  })
+
   describe('#jwt', () => {
     it('should return the default data for jwt', () => {
       const jwt = service.jwt

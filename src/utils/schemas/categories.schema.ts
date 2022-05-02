@@ -1,12 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import mongoose from 'mongoose'
 import { Document } from 'mongoose'
-import { Category as CategoryType } from 'nesquik-types'
+import { MarketCategory as CategoryType } from 'nesquik-types'
 import { SchemaOptions } from './schemas-options'
 
 export type CategoryDocument = Category & Document
 
 @Schema(SchemaOptions)
-export class Category implements CategoryType {
+export class Category implements Partial<CategoryType> {
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Market' })
+  marketID: string
+
   @Prop({ type: String })
   categoryID: string
 
@@ -16,11 +20,8 @@ export class Category implements CategoryType {
   @Prop({ type: String })
   name: string
 
-  @Prop({ type: String })
-  affiliateID: string
-
   @Prop({ type: Number, default: 0 })
-  order: string
+  order: number
 
   @Prop({ type: String })
   shape: string

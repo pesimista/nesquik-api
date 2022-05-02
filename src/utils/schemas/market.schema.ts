@@ -2,16 +2,17 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import mongoose, { Document } from 'mongoose'
 import {
   Banner,
-  Category,
   Coordinates,
-  Market as MarketType,
+  Market as MarketOG,
   MarketImages,
   Schedule,
 } from 'nesquik-types'
 import { BannerSchema } from './banners.schema'
+import { Category } from './categories.schema'
 import { SchemaOptions } from './schemas-options'
 
 export type MarketDocument = Market & Document
+type MarketType = Omit<MarketOG, 'categories'>
 
 @Schema(SchemaOptions)
 export class Market implements Partial<MarketType> {

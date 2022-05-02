@@ -10,6 +10,10 @@ export class AppConfigService {
     }
   }
 
+  get defaultParentCategory(): string {
+    return process.env.PARENT_CATEGORY || 'R6JtZlEk1IwViiOvRbKM'
+  }
+
   get jwt(): JwtModuleOptions {
     const minutes = process.env.EXPIRATION_MINUTES || '1'
 
