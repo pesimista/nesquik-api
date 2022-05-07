@@ -23,9 +23,9 @@ Start issuing request to [http://localhost:3200](http://localhost:3200)
 - [x] Add the mongoose library and set it up
 - [x] Add the authentication endpoints and the logic related to it
 - [ ] Add endpoints for
-  - [ ] Markets
+  - [X] Markets
   - [ ] Banners
-  - [ ] Categories
+  - [X] Categories
   - [ ] Products
   - [ ] Cart
   - [ ] Orders
