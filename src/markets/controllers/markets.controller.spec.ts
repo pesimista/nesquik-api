@@ -1,16 +1,11 @@
 import { ExecutionContext, ValidationPipe } from '@nestjs/common'
 import { NestApplication } from '@nestjs/core'
-import { JwtModule } from '@nestjs/jwt'
 import { Test, TestingModule } from '@nestjs/testing'
 import * as cookieParser from 'cookie-parser'
 import * as request from 'supertest'
+import { AuthModuleMock } from '../../../test/mocks/auth.module.mock'
 import { MarketMock, QuikMarketMock } from '../../../test/mocks/market.mock'
-import { UserServiceMock } from '../../../test/mocks/user.service.mock'
-import { AuthService } from '../../auth/providers/auth.service'
-import { UserService } from '../../auth/providers/user.service'
-import { JwtStrategy } from '../../auth/strategies/jwt.strategy'
-import { LocalStrategy } from '../../auth/strategies/local.strategy'
-import { AppConfigService } from '../../config/providers/configuration.service'
+import { CategoriesService } from '../../categories/providers/categories.service'
 import { JwtAuthGuard } from '../../utils/guards/jwt-auth.guard'
 import { MarketsService } from '../providers/markets.service'
 import { MarketsController } from './markets.controller'
@@ -26,29 +21,19 @@ describe('MarketsController  (e2e)', () => {
     importMarket: jest.fn(),
   }
 
-  const AppConfigServiceMock = {
-    tokenName: 'nesquik',
-    jwt: { secret: 'secret' },
+  const CategoriesServiceMock = {
+    getByMarketId: jest.fn(),
   }
 
   beforeEach(async () => {
     jest.clearAllMocks()
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        JwtModule.register({
-          secret: 'secret',
-          signOptions: { expiresIn: '1m' },
-        }),
-      ],
+      imports: [AuthModuleMock],
       controllers: [MarketsController],
       providers: [
         { provide: MarketsService, useValue: serviceMock },
-        JwtStrategy,
-        LocalStrategy,
-        AuthService,
-        { provide: UserService, useValue: UserServiceMock },
-        { provide: AppConfigService, useValue: AppConfigServiceMock },
+        { provide: CategoriesService, useValue: CategoriesServiceMock },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -101,14 +86,50 @@ describe('MarketsController  (e2e)', () => {
       const market = {
         marketID: 'someId',
         id: 'id',
+        categories: [],
       }
-      serviceMock.getSingleMarket.mockResolvedValue(market)
+      const doc = {
+        ...market,
+        populate: jest.fn(),
+        toJSON: () => market,
+      }
+
+      serviceMock.getSingleMarket.mockResolvedValue(doc)
+      CategoriesServiceMock.getByMarketId.mockResolvedValue([])
 
       const res = await request(app.getHttpServer()).get('/markets/someid')
       expect(res.status).toEqual(200)
       expect(res.body).toEqual(market)
 
       expect(serviceMock.getSingleMarket).toHaveBeenCalledWith('someid')
+      expect(doc.populate).not.toHaveBeenCalled()
+      expect(CategoriesServiceMock.getByMarketId).not.toHaveBeenCalled()
+    })
+
+    it('should return the info with categories and market categories', async () => {
+      const market = {
+        marketID: 'someId',
+        id: 'id',
+        categories: [],
+      }
+      const doc = {
+        ...market,
+        populate: jest.fn(),
+        toJSON: () => market,
+      }
+
+      serviceMock.getSingleMarket.mockResolvedValue(doc)
+      CategoriesServiceMock.getByMarketId.mockResolvedValue([])
+
+      const res = await request(app.getHttpServer()).get(
+        '/markets/someid?expand=categories,marketCategories'
+      )
+      expect(res.status).toEqual(200)
+      expect(res.body).toHaveProperty('marketCategories')
+
+      expect(serviceMock.getSingleMarket).toHaveBeenCalledWith('someid')
+      expect(doc.populate).toHaveBeenCalledWith('categories')
+      expect(CategoriesServiceMock.getByMarketId).toHaveBeenCalled()
     })
   })
 

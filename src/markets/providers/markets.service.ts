@@ -3,14 +3,14 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { Schedule } from 'nesquik-types'
 import { Logger } from 'winston'
+import { Banner, BannerDocument } from '../../utils/schemas/banners.schema'
 import {
   Category,
   CategoryDocument,
 } from '../../utils/schemas/categories.schema'
-import { Banner, BannerDocument } from '../../utils/schemas/banners.schema'
+import { Market, MarketDocument } from '../../utils/schemas/market.schema'
 import { ImportMarketDto } from '../dto/importMaket.dto'
 import { PostMarketDto } from '../dto/postMarket.dto'
-import { Market, MarketDocument } from '../../utils/schemas/market.schema'
 
 type FullHourType = { hour: number | string; minutes: number | string }
 
@@ -32,11 +32,13 @@ export class MarketsService {
     if (marketID.length === 24) {
       this.logger.info('searching market by doc.id', { marketID })
       doc = await this.model.findById(marketID)
-      return doc
     }
 
-    this.logger.info('searching market by doc.id', { marketID })
-    doc = await this.model.findOne({ marketID })
+    if (!doc) {
+      this.logger.info('searching market by doc.marketID', { marketID })
+      doc = await this.model.findOne({ marketID })
+    }
+
     return doc
   }
 
@@ -79,16 +81,9 @@ export class MarketsService {
 
   async parseQuikMaket({
     ranking,
-    categories,
     schedule,
     ...market
   }: ImportMarketDto): Promise<Partial<Market>> {
-    const categoryPromise = categories.categoriesDescriptions.map((item) =>
-      this.categoryModel.findOne({ categoryID: item.categoryID })
-    )
-
-    const categoryItems = await Promise.all(categoryPromise)
-
     const scheduleItems: Partial<Schedule>[] = schedule.map((item) => {
       const initialTime = this.getFullHour(item.initialTime, false)
       const finalTime = this.getFullHour(item.finalTime, false)
@@ -127,7 +122,6 @@ export class MarketsService {
       order: ranking,
       marketing,
       hasPromo: Boolean(market.hasPromo),
-      categories: categoryItems.filter(Boolean),
       schedule: scheduleItems,
     }
   }
@@ -136,17 +130,27 @@ export class MarketsService {
     const context = { marketID: dto.marketID, name: dto.name }
 
     const market = await this.parseQuikMaket(dto)
-    let doc = await this.getSingleMarket(dto.marketID)
+    const doc = await this.getSingleMarket(dto.marketID)
+
+    const categoryPromise = dto.categories.categoriesDescriptions.map((item) =>
+      this.categoryModel.findOne({ categoryID: item.categoryID })
+    )
+
+    const categoryItems = await Promise.all(categoryPromise)
 
     if (doc) {
       this.logger.info('updating market doc', context)
-      await doc.updateOne(market)
-      return doc
+      return await doc.updateOne({
+        ...market,
+        categories: categoryItems.filter(Boolean),
+      })
     }
 
     this.logger.info('creating market doc', context)
-    doc = await this.model.create(market)
-    return doc
+    return await this.model.create({
+      ...market,
+      categories: categoryItems.filter(Boolean),
+    })
   }
 
   getFullHour(value: string, asNumber = true): FullHourType {

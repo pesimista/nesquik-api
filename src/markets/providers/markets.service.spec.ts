@@ -146,7 +146,6 @@ describe('MarketsService', () => {
 
   describe('#parseQuikMaket', () => {
     it('should throw an error if the marketID is already registered', async () => {
-      mockCategoryModel.findOne = jest.fn().mockImplementation((item) => item)
       mockBannerModel.mockImplementation((item) => item)
 
       const market = QuikMarketMock
@@ -172,12 +171,9 @@ describe('MarketsService', () => {
         expect(res).toHaveProperty('order', market.ranking)
         expect(res).toHaveProperty('marketing')
         expect(res).toHaveProperty('hasPromo', false)
-        expect(res).toHaveProperty('categories')
+        expect(res).not.toHaveProperty('categories')
         expect(res).toHaveProperty('schedule')
 
-        expect(mockCategoryModel.findOne).toHaveBeenCalledTimes(
-          market.categories.ids.length
-        )
         expect(mockBannerModel).toHaveBeenCalledTimes(market.marketing.length)
         expect(hourSpy).toHaveBeenCalledTimes(market.schedule.length * 2)
       } catch (error) {

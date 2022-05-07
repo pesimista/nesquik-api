@@ -5,6 +5,7 @@ import { Banner, BannerSchema } from '../utils/schemas/banners.schema'
 import { MarketsController } from './controllers/markets.controller'
 import { MarketsService } from './providers/markets.service'
 import { Market, MarketSchema } from '../utils/schemas/market.schema'
+import { CategoriesService } from '../categories/providers/categories.service'
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { Market, MarketSchema } from '../utils/schemas/market.schema'
     ]),
   ],
   controllers: [MarketsController],
-  providers: [MarketsService],
+  providers: [MarketsService, CategoriesService],
 })
 export class MarketsModule {}

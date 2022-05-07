@@ -6,17 +6,21 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common'
 import { PostCategoryDto } from '../dto/postCategory.dto'
 import { CategoriesService } from '../providers/categories.service'
 import { Category } from '../../utils/schemas/categories.schema'
 import { AppConfigService } from '../../config/providers/configuration.service'
 import { FindMarketCategoriesResponse } from '../types/findMarketCategories.response'
+import { JwtAuthGuard } from '../../utils/guards/jwt-auth.guard'
+import { MarketsService } from '../../markets/providers/markets.service'
 
 @Controller('categories')
 export class CategoriesController {
   constructor(
     private service: CategoriesService,
+    private marketsService: MarketsService,
     private config: AppConfigService
   ) {}
 
@@ -46,7 +50,7 @@ export class CategoriesController {
   @Get(':id')
   async findCategory(@Param('id') categoryID: string): Promise<Category> {
     try {
-      const doc = this.service.getSingle(categoryID)
+      const doc = await this.service.getSingle(categoryID)
 
       if (!doc) {
         throw new NotFoundException('Category with the given id not found')
@@ -58,7 +62,13 @@ export class CategoriesController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async createCategory(@Body() dto: PostCategoryDto): Promise<Category> {
-    return this.service.importCategory(dto)
+    let market
+    if (dto.marketID) {
+      market = await this.marketsService.getSingleMarket(dto.marketID)
+    }
+
+    return this.service.importCategory(dto, market)
   }
 }

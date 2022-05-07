@@ -1,20 +1,25 @@
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
-import { Category } from '../../utils/schemas/categories.schema'
+import {
+  Category,
+  CategoryDocument,
+} from '../../utils/schemas/categories.schema'
 import { CategoriesService } from './categories.service'
 import { Model } from 'mongoose'
-import { MarketDocument } from '../../utils/schemas/market.schema'
+import { Market, MarketDocument } from '../../utils/schemas/market.schema'
 import { MarketsService } from '../../markets/providers/markets.service'
 import { LoggerMock } from '../../../test/mocks/logger.mock'
 import { CategoryMock } from '../../../test/mocks/categories.mock'
 import { MarketMock } from '../../../test/mocks/market.mock'
 import { PostCategoryDto } from '../dto/postCategory.dto'
 
-type CategoryModel = Model<MarketDocument>
+type CategoryModel = Model<CategoryDocument>
+type MarketModel = Model<MarketDocument>
 
 describe('CategoriesService', () => {
   let service: CategoriesService
   let mockCategoryModel: CategoryModel
+  let mockMarketModel: MarketModel
 
   const ModelMock = {
     ...Model,
@@ -22,16 +27,16 @@ describe('CategoriesService', () => {
     create: jest.fn(),
   }
 
-  const MarketsServiceMock = {
-    getSingleMarket: jest.fn(),
-  }
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CategoriesService,
         { provide: 'winston', useValue: LoggerMock },
-        { provide: MarketsService, useValue: MarketsServiceMock },
+        { provide: MarketsService, useValue: mockMarketModel },
+        {
+          provide: getModelToken(Market.name),
+          useValue: ModelMock,
+        },
         {
           provide: getModelToken(Category.name),
           useValue: ModelMock,
@@ -42,6 +47,7 @@ describe('CategoriesService', () => {
     service = module.get<CategoriesService>(CategoriesService)
 
     mockCategoryModel = module.get<CategoryModel>(getModelToken(Category.name))
+    mockMarketModel = module.get<MarketModel>(getModelToken(Market.name))
   })
 
   it('should be defined', () => {
@@ -136,26 +142,22 @@ describe('CategoriesService', () => {
         populate: jest.fn(),
       }
 
-      MarketsServiceMock.getSingleMarket.mockResolvedValue(doc)
+      mockMarketModel.findById = jest.fn().mockResolvedValue(doc)
 
       const res = await service.getCategoriesInMarket('marketID')
 
       expect(doc.populate).toHaveBeenCalledWith('categories')
-      expect(MarketsServiceMock.getSingleMarket).toHaveBeenCalledWith(
-        'marketID'
-      )
+      expect(mockMarketModel.findById).toHaveBeenCalledWith('marketID')
 
       expect(res).toEqual(CategoryMock)
     })
 
     it('should return an empty array if the doc is null', async () => {
-      MarketsServiceMock.getSingleMarket.mockResolvedValue(null)
+      mockMarketModel.findById = jest.fn().mockResolvedValue(null)
 
       const res = await service.getCategoriesInMarket('marketID')
 
-      expect(MarketsServiceMock.getSingleMarket).toHaveBeenCalledWith(
-        'marketID'
-      )
+      expect(mockMarketModel.findById).toHaveBeenCalledWith('marketID')
 
       expect(res).toEqual([])
     })
@@ -168,9 +170,8 @@ describe('CategoriesService', () => {
       const doc = { updateOne: jest.fn() }
 
       mockCategoryModel.findOne = jest.fn().mockResolvedValue(doc)
-      MarketsServiceMock.getSingleMarket.mockResolvedValue(null)
 
-      await service.importCategory(dto)
+      await service.importCategory(dto, null)
 
       expect(doc.updateOne).toHaveBeenCalled()
       expect(mockCategoryModel.create).not.toHaveBeenCalled()
@@ -178,9 +179,8 @@ describe('CategoriesService', () => {
 
     it('should create a new document', async () => {
       mockCategoryModel.findOne = jest.fn().mockResolvedValue(null)
-      MarketsServiceMock.getSingleMarket.mockResolvedValue(null)
 
-      await service.importCategory(dto)
+      await service.importCategory(dto, null)
 
       expect(mockCategoryModel.create).toHaveBeenCalled()
     })

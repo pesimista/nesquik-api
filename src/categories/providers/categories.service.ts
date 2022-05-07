@@ -2,11 +2,11 @@ import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { Logger } from 'winston'
-import { MarketsService } from '../../markets/providers/markets.service'
 import {
   Category,
   CategoryDocument,
 } from '../../utils/schemas/categories.schema'
+import { Market, MarketDocument } from '../../utils/schemas/market.schema'
 import { PostCategoryDto } from '../dto/postCategory.dto'
 
 @Injectable()
@@ -14,7 +14,7 @@ export class CategoriesService {
   constructor(
     @Inject('winston') private logger: Logger,
     @InjectModel(Category.name) private model: Model<CategoryDocument>,
-    private marketService: MarketsService
+    @InjectModel(Market.name) private marketModel: Model<MarketDocument>
   ) {}
 
   async getCategories(parent?: string): Promise<CategoryDocument[]> {
@@ -74,7 +74,7 @@ export class CategoriesService {
     }
 
     this.logger.info('retrieving categories in market', context)
-    const doc = await this.marketService.getSingleMarket(marketID)
+    const doc = await this.marketModel.findById(marketID)
 
     if (!doc) {
       this.logger.info('no document with the given id', context)
@@ -86,16 +86,17 @@ export class CategoriesService {
     return doc.categories as CategoryDocument[]
   }
 
-  async importCategory(dto: PostCategoryDto): Promise<CategoryDocument> {
+  async importCategory(
+    dto: PostCategoryDto,
+    market?: MarketDocument
+  ): Promise<CategoryDocument> {
     const context = {
       name: this.importCategory.name,
       categoryID: dto.categoryID,
-      marketName: dto.name,
-      marketID: dto.marketID,
+      categoryName: dto.name,
     }
 
     const doc = await this.model.findOne({ categoryID: dto.categoryID })
-    const market = await this.marketService.getSingleMarket(dto.marketID)
 
     if (doc) {
       this.logger.info('updating category doc', context)
