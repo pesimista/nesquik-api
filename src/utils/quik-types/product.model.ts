@@ -16,6 +16,7 @@ export interface QuikProduct {
     name: string
     image?: string
   }
+  label?: string
   mainMarket: string
   marketID: string[]
   price: number
