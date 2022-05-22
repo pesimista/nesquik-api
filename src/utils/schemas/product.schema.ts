@@ -9,6 +9,9 @@ import { SchemaOptions } from './schemas-options'
 export type ProductDocument = Product & Document
 export type ProductOptionsDocument = ProductOption & Document
 
+export type OptionModel = mongoose.Model<ProductOptionsDocument>
+export type ProductModel = mongoose.Model<ProductDocument>
+
 @Schema(SchemaOptions)
 export class ProductOption {
   @Prop({ type: String })
@@ -36,7 +39,7 @@ export class ProductOption {
   // constraints
 
   @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }])
-  elements: Product[]
+  elements: Product[] | string[]
 
   @Prop([
     {
@@ -44,7 +47,7 @@ export class ProductOption {
       values: { type: Number, default: 0 },
     },
   ])
-  selected: OptionValues
+  selected: OptionValues[]
 }
 
 @Schema(SchemaOptions)
@@ -101,7 +104,7 @@ export class Product implements Partial<ProductType> {
   promoValue: number
 
   @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }])
-  categories: Category[]
+  categories: Category[] | string[]
 
   @Prop({ type: Boolean, default: false })
   isPromo: boolean

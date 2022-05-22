@@ -31,7 +31,7 @@ describe('CategoriesController', () => {
   }
 
   const MarketsServiceMock = {
-    getSingleMarket: jest.fn(),
+    getSingle: jest.fn(),
   }
 
   beforeEach(async () => {
@@ -174,7 +174,7 @@ describe('CategoriesController', () => {
 
       expect(response.status).toEqual(HttpStatus.CREATED)
 
-      expect(MarketsServiceMock.getSingleMarket).not.toHaveBeenCalled()
+      expect(MarketsServiceMock.getSingle).not.toHaveBeenCalled()
       expect(mockCategoryService.importCategory).toHaveBeenCalledWith(
         category,
         undefined
@@ -182,7 +182,7 @@ describe('CategoriesController', () => {
     })
 
     it('should create an existing category', async () => {
-      MarketsServiceMock.getSingleMarket.mockResolvedValue(MarketMock)
+      MarketsServiceMock.getSingle.mockResolvedValue(MarketMock)
       mockCategoryService.importCategory.mockImplementation((item) => item)
 
       const category = CategoryMock[1]
@@ -193,7 +193,7 @@ describe('CategoriesController', () => {
         .send(category)
 
       expect(response.status).toEqual(HttpStatus.CREATED)
-      expect(MarketsServiceMock.getSingleMarket).toHaveBeenCalled()
+      expect(MarketsServiceMock.getSingle).toHaveBeenCalled()
       expect(mockCategoryService.importCategory).toHaveBeenCalledWith(
         category,
         MarketMock

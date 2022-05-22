@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import mongoose from 'mongoose'
 import { Document } from 'mongoose'
 import { MarketCategory as CategoryType } from 'nesquik-types'
+import { Market } from './market.schema'
 import { SchemaOptions } from './schemas-options'
 
 export type CategoryDocument = Category & Document
@@ -9,7 +10,7 @@ export type CategoryDocument = Category & Document
 @Schema(SchemaOptions)
 export class Category implements Partial<CategoryType> {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Market' })
-  marketID: string
+  market: string | Market
 
   @Prop({ type: String })
   categoryID: string

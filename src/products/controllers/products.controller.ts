@@ -24,7 +24,7 @@ export class ProductsController {
   ) {}
 
   @Get()
-  async getAll(@Query() query: GetAllProductsDto) {
+  async findAll(@Query() query: GetAllProductsDto) {
     const items = await this.service.getAllProducts(query)
 
     return {
@@ -34,7 +34,7 @@ export class ProductsController {
   }
 
   @Get(':id')
-  async getSingle(@Param('id') productID) {
+  async findProduct(@Param('id') productID) {
     const doc = await this.service.getSingle(productID)
 
     if (!doc) {
@@ -46,7 +46,7 @@ export class ProductsController {
 
   @Post('import')
   async importProduct(@Body() dto): Promise<ProductDocument> {
-    const market = await this.marketService.getSingleMarket(dto.mainMarket)
+    const market = await this.marketService.getSingle(dto.mainMarket)
 
     if (!market) {
       throw new BadRequestException('Market not found for this product')

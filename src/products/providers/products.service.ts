@@ -1,20 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
+
 import { Logger } from 'winston'
 import { QuikProduct } from '../../utils/quik-types'
 import { CategoryDocument } from '../../utils/schemas/categories.schema'
 import { MarketDocument } from '../../utils/schemas/market.schema'
 import {
+  OptionModel,
   Product,
   ProductDocument,
+  ProductModel,
   ProductOption,
   ProductOptionsDocument,
 } from '../../utils/schemas/product.schema'
 import { GetAllProductsDto } from '../dto/getProducts.dto'
-
-type OptionModel = Model<ProductOptionsDocument>
-type ProductModel = Model<ProductDocument>
+import { ImportProductDto } from '../dto/importProduct.dto'
 
 @Injectable()
 export class ProductsService {
@@ -67,7 +67,7 @@ export class ProductsService {
     return doc
   }
 
-  formatProduct(dto: QuikProduct): Partial<Product> {
+  formatProduct(dto: ImportProductDto): Partial<Product> {
     const isSubproduct = !Boolean(dto.productID) || Boolean(dto.isSubproduct)
     let name = (dto.name || dto.label).toLocaleLowerCase()
     name = name[0].toUpperCase() + name.substring(1)
@@ -82,7 +82,7 @@ export class ProductsService {
       isExclusive: Boolean(dto.isExclusive),
       tags: dto.tags,
       description: dto.description,
-      shortDescription: dto.shortDescription ?? dto.description,
+      shortDescription: dto.shortDescription || dto.description,
       pictures: dto.pictures,
       isAvailable: true,
       priority: dto.priority,
@@ -95,7 +95,7 @@ export class ProductsService {
   }
 
   async importProduct(
-    dto: QuikProduct,
+    dto: ImportProductDto,
     marketID?: MarketDocument,
     categories?: CategoryDocument[],
     options?: ProductOptionsDocument[]

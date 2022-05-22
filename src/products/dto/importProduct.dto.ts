@@ -1,7 +1,11 @@
-import { QuikCategory } from './category.model'
-import { QuikSchedule } from './schedule.model'
+import { QuikCategory, QuikProduct, QuikSchedule } from '../../utils/quik-types'
 
-export interface QuikProduct {
+export class ImportProductDto implements Partial<QuikProduct> {
+  category?: Partial<QuikCategory>[]
+  marketCategories: {
+    ids: string[]
+    categoriesDescriptions: Partial<QuikCategory>[]
+  }
   productID: string
   barcode: string
   createdAt: any
@@ -32,21 +36,6 @@ export interface QuikProduct {
   hasLongDistanceDelivery: boolean
   units?: number
   unitsSold: number
-  categories: {
-    ids: string[]
-    categoriesDescriptions: Partial<QuikCategory>[]
-  }
-  category?: Partial<QuikCategory>[]
-  marketCategories: {
-    ids: string[]
-    categoriesDescriptions: Partial<QuikCategory>[]
-  }
-  // options: ProductOptionBase<any>[];
-  optionsValue: {
-    units: any
-    [key: string]: { value: string; multiplier: number }[]
-  }
-  prettifiedOptions: { label: string; value: string | string[] }[]
   measure?: string
   magnitude?: string
   shelf?: string
@@ -55,12 +44,9 @@ export interface QuikProduct {
   isSubproduct: boolean
   isOnlyDelivery?: boolean
   priority?: number
-  constraints: {
-    max: number
-  }
+  constraints: { max: number }
   buyPrice?: number
   minStock?: number
-  // warning?: ValidatedProductWarning;
   fromQuikMarket?: boolean
   cartIndex?: number
   schedule?: QuikSchedule[]

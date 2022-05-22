@@ -129,7 +129,7 @@ describe('CategoriesService', () => {
 
       expect(sortSpy).toHaveBeenCalledWith({ order: 'desc' })
       expect(mockCategoryModel.find).toHaveBeenCalledWith({
-        marketID: 'marketid',
+        market: 'marketid',
       })
     })
   })

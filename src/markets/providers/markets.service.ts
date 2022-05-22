@@ -27,7 +27,7 @@ export class MarketsService {
     return this.model.find().populate('categories').sort('order')
   }
 
-  async getSingleMarket(marketID: string): Promise<MarketDocument> {
+  async getSingle(marketID: string): Promise<MarketDocument> {
     let doc
     if (marketID.length === 24) {
       this.logger.info('searching market by doc.id', { marketID })
@@ -43,7 +43,7 @@ export class MarketsService {
   }
 
   async createMarket(dto: PostMarketDto): Promise<MarketDocument> {
-    const doc = await this.getSingleMarket(dto.marketID)
+    const doc = await this.getSingle(dto.marketID)
 
     if (doc) {
       throw new HttpException(
@@ -130,7 +130,7 @@ export class MarketsService {
     const context = { marketID: dto.marketID, name: dto.name }
 
     const market = await this.parseQuikMaket(dto)
-    const doc = await this.getSingleMarket(dto.marketID)
+    const doc = await this.getSingle(dto.marketID)
 
     const categoryPromise = dto.categories.categoriesDescriptions.map((item) =>
       this.categoryModel.findOne({ categoryID: item.categoryID })

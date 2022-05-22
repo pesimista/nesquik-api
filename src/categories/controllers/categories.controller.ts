@@ -66,7 +66,7 @@ export class CategoriesController {
   async createCategory(@Body() dto: PostCategoryDto): Promise<Category> {
     let market
     if (dto.marketID) {
-      market = await this.marketsService.getSingleMarket(dto.marketID)
+      market = await this.marketsService.getSingle(dto.marketID)
     }
 
     return this.service.importCategory(dto, market)

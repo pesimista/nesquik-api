@@ -101,7 +101,7 @@ describe('MarketsService', () => {
     })
   })
 
-  describe('#getSingleMarket', () => {
+  describe('#getSingle', () => {
     it('should find the doc by id', async () => {
       const market = {
         id: 'marketID',
@@ -114,7 +114,7 @@ describe('MarketsService', () => {
       const findOneSpy = jest.spyOn(mockMarketModel, 'findOne')
 
       try {
-        const res = await service.getSingleMarket('626a374e48d953beb475a2e4')
+        const res = await service.getSingle('626a374e48d953beb475a2e4')
         expect(findByIdSpy).toHaveBeenCalledWith('626a374e48d953beb475a2e4')
         expect(findOneSpy).not.toHaveBeenCalled()
         expect(res).toEqual(market)
@@ -135,7 +135,7 @@ describe('MarketsService', () => {
         .mockResolvedValue(market)
 
       try {
-        const res = await service.getSingleMarket('marketID')
+        const res = await service.getSingle('marketID')
         expect(findOneSpy).toHaveBeenCalledWith({ marketID: 'marketID' })
         expect(res).toEqual(market)
       } catch (error) {

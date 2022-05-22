@@ -38,7 +38,7 @@ export class MarketsController {
     @Query() query: GetMarketDto
   ): Promise<SingleMarketResponse> {
     try {
-      const doc = await this.service.getSingleMarket(id)
+      const doc = await this.service.getSingle(id)
 
       if (!doc) {
         throw new HttpException(

@@ -16,7 +16,7 @@ describe('MarketsController  (e2e)', () => {
 
   const serviceMock = {
     getAllMarkets: jest.fn(),
-    getSingleMarket: jest.fn(),
+    getSingle: jest.fn(),
     createMarket: jest.fn(),
     importMarket: jest.fn(),
   }
@@ -74,12 +74,12 @@ describe('MarketsController  (e2e)', () => {
 
   describe('#Get /markets/:storeid', () => {
     it('should throw an error if the doc is not registered', async () => {
-      serviceMock.getSingleMarket.mockResolvedValue(null)
+      serviceMock.getSingle.mockResolvedValue(null)
 
       const res = await request(app.getHttpServer()).get('/markets/someid')
       expect(res.status).toEqual(404)
 
-      expect(serviceMock.getSingleMarket).toHaveBeenCalled()
+      expect(serviceMock.getSingle).toHaveBeenCalled()
     })
 
     it('should return the info for a single market', async () => {
@@ -94,14 +94,14 @@ describe('MarketsController  (e2e)', () => {
         toJSON: () => market,
       }
 
-      serviceMock.getSingleMarket.mockResolvedValue(doc)
+      serviceMock.getSingle.mockResolvedValue(doc)
       CategoriesServiceMock.getByMarketId.mockResolvedValue([])
 
       const res = await request(app.getHttpServer()).get('/markets/someid')
       expect(res.status).toEqual(200)
       expect(res.body).toEqual(market)
 
-      expect(serviceMock.getSingleMarket).toHaveBeenCalledWith('someid')
+      expect(serviceMock.getSingle).toHaveBeenCalledWith('someid')
       expect(doc.populate).not.toHaveBeenCalled()
       expect(CategoriesServiceMock.getByMarketId).not.toHaveBeenCalled()
     })
@@ -118,7 +118,7 @@ describe('MarketsController  (e2e)', () => {
         toJSON: () => market,
       }
 
-      serviceMock.getSingleMarket.mockResolvedValue(doc)
+      serviceMock.getSingle.mockResolvedValue(doc)
       CategoriesServiceMock.getByMarketId.mockResolvedValue([])
 
       const res = await request(app.getHttpServer()).get(
@@ -127,7 +127,7 @@ describe('MarketsController  (e2e)', () => {
       expect(res.status).toEqual(200)
       expect(res.body).toHaveProperty('marketCategories')
 
-      expect(serviceMock.getSingleMarket).toHaveBeenCalledWith('someid')
+      expect(serviceMock.getSingle).toHaveBeenCalledWith('someid')
       expect(doc.populate).toHaveBeenCalledWith('categories')
       expect(CategoriesServiceMock.getByMarketId).toHaveBeenCalled()
     })

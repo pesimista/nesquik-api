@@ -5,12 +5,7 @@ export class GetAllProductsDto {
   @IsOptional()
   @IsBoolean()
   @Transform(({ value }) => value === 'true')
-  subproducts: boolean
-
-  @IsOptional()
-  @IsBoolean()
-  @Transform(({ value }) => value === 'true')
-  expand: boolean
+  subproducts?: boolean
 
   @IsOptional()
   @IsString()

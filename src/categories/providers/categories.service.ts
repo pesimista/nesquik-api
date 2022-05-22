@@ -55,26 +55,26 @@ export class CategoriesService {
     return doc
   }
 
-  async getByMarketId(marketID: string): Promise<CategoryDocument[]> {
+  async getByMarketId(market: string): Promise<CategoryDocument[]> {
     const context = {
       name: this.getByMarketId.name,
-      marketID,
+      market,
     }
 
     this.logger.info('retrieving category docs', context)
-    const docs = await this.model.find({ marketID }).sort({ order: 'desc' })
+    const docs = await this.model.find({ market }).sort({ order: 'desc' })
     this.logger.debug(`found ${docs.length} category docs`, context)
     return docs
   }
 
-  async getCategoriesInMarket(marketID: string): Promise<CategoryDocument[]> {
+  async getCategoriesInMarket(market: string): Promise<CategoryDocument[]> {
     const context = {
       name: this.getCategoriesInMarket.name,
-      marketID,
+      market,
     }
 
     this.logger.info('retrieving categories in market', context)
-    const doc = await this.marketModel.findById(marketID)
+    const doc = await this.marketModel.findById(market)
 
     if (!doc) {
       this.logger.info('no document with the given id', context)
@@ -100,11 +100,11 @@ export class CategoriesService {
 
     if (doc) {
       this.logger.info('updating category doc', context)
-      return doc.updateOne({ ...dto, marketID: market })
+      return doc.updateOne({ ...dto, market: market })
     }
 
     this.logger.info('creating category doc', context)
-    const category = await this.model.create({ ...dto, marketID: market })
+    const category = await this.model.create({ ...dto, market: market })
 
     return category
   }
