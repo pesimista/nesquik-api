@@ -96,7 +96,7 @@ export class Market implements Partial<MarketType> {
   images: MarketImages
 
   @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }])
-  categories: Category[]
+  categories: Category[] | string[]
 }
 
 export const MarketSchema = SchemaFactory.createForClass(Market)

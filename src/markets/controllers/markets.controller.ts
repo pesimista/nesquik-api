@@ -6,13 +6,11 @@ import {
   HttpStatus,
   Param,
   Post,
-  Query,
   UseGuards,
 } from '@nestjs/common'
 import { CategoriesService } from '../../categories/providers/categories.service'
 import { JwtAuthGuard } from '../../utils/guards/jwt-auth.guard'
 import { Market } from '../../utils/schemas/market.schema'
-import { GetMarketDto } from '../dto/getMarkets.dto'
 import { ImportMarketDto } from '../dto/importMaket.dto'
 import { PostMarketDto } from '../dto/postMarket.dto'
 import { MarketsService } from '../providers/markets.service'
@@ -34,8 +32,7 @@ export class MarketsController {
   @Get(':storeid')
   @UseGuards(JwtAuthGuard)
   async findMarket(
-    @Param('storeid') id: string,
-    @Query() query: GetMarketDto
+    @Param('storeid') id: string
   ): Promise<SingleMarketResponse> {
     try {
       const doc = await this.service.getSingle(id)
@@ -49,16 +46,10 @@ export class MarketsController {
 
       const response = doc.toJSON() as SingleMarketResponse
 
-      if (query.expand?.includes('categories')) {
-        doc.populate('categories')
-      }
-
-      if (query.expand?.includes('marketCategories')) {
-        const marketCategories = await this.categoriesService.getByMarketId(
-          doc._id
-        )
-        response.marketCategories = marketCategories
-      }
+      const marketCategories = await this.categoriesService.getByMarketId(
+        doc._id
+      )
+      response.marketCategories = marketCategories
 
       return response
     } catch (error) {

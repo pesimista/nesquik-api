@@ -1,27 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import {
-  ProductModel,
-  OptionModel,
-  Product,
-  ProductOption,
-} from '../../utils/schemas/product.schema'
-import { ProductsService } from './products.service'
-import { Model } from 'mongoose'
-import { LoggerMock } from '../../../test/mocks/logger.mock'
 import { getModelToken } from '@nestjs/mongoose'
+import { Test, TestingModule } from '@nestjs/testing'
 import { fail } from 'assert'
+import { LoggerMock } from '../../../test/mocks/logger.mock'
+import { ModelMockType, ModelMock } from '../../../test/mocks/mongoose.mock'
 import { ProductMock, QuikProducMock } from '../../../test/mocks/product.mock'
+import { Product, ProductOption } from '../../utils/schemas/product.schema'
+import { ProductsService } from './products.service'
 
 describe('ProductsService', () => {
   let service: ProductsService
-  let mockProductModel: ProductModel
+  let productModelMock: ModelMockType
   let mockOptionModel: jest.Mock
-
-  const ModelMock = {
-    ...Model,
-    find: jest.fn(),
-    create: jest.fn(),
-  }
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -32,7 +21,7 @@ describe('ProductsService', () => {
         { provide: 'winston', useValue: LoggerMock },
         {
           provide: getModelToken(Product.name),
-          useValue: ModelMock,
+          useValue: ModelMock([ProductMock]),
         },
         {
           provide: getModelToken(ProductOption.name),
@@ -42,7 +31,7 @@ describe('ProductsService', () => {
     }).compile()
 
     service = module.get<ProductsService>(ProductsService)
-    mockProductModel = module.get<ProductModel>(getModelToken(Product.name))
+    productModelMock = module.get<ModelMockType>(getModelToken(Product.name))
     mockOptionModel = module.get<jest.Mock>(getModelToken(ProductOption.name))
   })
 
@@ -56,7 +45,7 @@ describe('ProductsService', () => {
         market: 'somemarket',
       })
 
-      expect(mockProductModel.find).toHaveBeenCalledWith({
+      expect(productModelMock.find).toHaveBeenCalledWith({
         market: 'somemarket',
         isSubproduct: false,
       })
@@ -68,7 +57,7 @@ describe('ProductsService', () => {
         market: null,
       })
 
-      expect(mockProductModel.find).toHaveBeenCalledWith({
+      expect(productModelMock.find).toHaveBeenCalledWith({
         isSubproduct: true,
       })
     })
@@ -76,43 +65,29 @@ describe('ProductsService', () => {
 
   describe('#getSingle', () => {
     it('should find the doc by id', async () => {
-      const product = {
-        ...ProductMock,
-        populate: jest.fn().mockReturnThis(),
-      }
-
-      mockProductModel.findById = jest.fn().mockReturnValue(product)
-      const findOneSpy = jest.spyOn(mockProductModel, 'findOne')
-
       try {
-        const res = await service.getSingle(product.id)
-        expect(mockProductModel.findById).toHaveBeenCalledWith(product.id)
-        expect(product.populate).toHaveBeenCalledTimes(3)
+        const res = await service.getSingle(ProductMock.id)
+        expect(productModelMock.findById).toHaveBeenCalledWith(ProductMock.id)
+        expect(productModelMock.doc.populate).toHaveBeenCalledTimes(3)
 
-        expect(findOneSpy).not.toHaveBeenCalled()
-        expect(res).toEqual(product)
+        expect(productModelMock.findOne).not.toHaveBeenCalled()
+        expect(res.id).toEqual(ProductMock.id)
+        expect(res.name).toEqual(ProductMock.name)
       } catch (error) {
         fail(`unexpected code path: ${error.message}`)
       }
     })
 
     it('should find the doc by productID', async () => {
-      const product = {
-        ...ProductMock,
-        populate: jest.fn().mockReturnThis(),
-      }
-
-      mockProductModel.findOne = jest.fn().mockReturnValue(product)
-      const findByIdSpy = jest.spyOn(mockProductModel, 'findById')
-
       try {
-        const res = await service.getSingle(product.productID)
-        expect(findByIdSpy).not.toHaveBeenCalled()
-        expect(mockProductModel.findOne).toHaveBeenCalledWith({
-          productID: product.productID,
+        const res = await service.getSingle(ProductMock.productID)
+        expect(productModelMock.findById).not.toHaveBeenCalled()
+        expect(productModelMock.findOne).toHaveBeenCalledWith({
+          productID: ProductMock.productID,
         })
-        expect(product.populate).toHaveBeenCalledTimes(3)
-        expect(res).toEqual(product)
+        expect(productModelMock.doc.populate).toHaveBeenCalledTimes(3)
+        expect(res.productID).toEqual(ProductMock.productID)
+        expect(res.name).toEqual(ProductMock.name)
       } catch (error) {
         fail(`unexpected code path: ${error.message}`)
       }
@@ -161,75 +136,46 @@ describe('ProductsService', () => {
 
   describe('#importProduct', () => {
     it('should create a new product', async () => {
-      mockProductModel.findOne = jest.fn().mockResolvedValue(null)
-      mockProductModel.create = jest.fn()
+      productModelMock.findOne = jest.fn().mockResolvedValue(null)
 
       await service.importProduct(QuikProducMock)
 
-      expect(mockProductModel.create).toHaveBeenCalled()
-      expect(mockProductModel.findOne).toHaveBeenCalled()
+      expect(productModelMock.create).toHaveBeenCalled()
+      expect(productModelMock.findOne).toHaveBeenCalled()
     })
 
     it('should update an already created product', async () => {
-      const doc = {
-        ...ProductMock,
-        updateOne: jest.fn(),
-      }
-
-      mockProductModel.findOne = jest.fn().mockResolvedValue(doc)
-      mockProductModel.create = jest.fn()
-
       await service.importProduct(QuikProducMock)
 
-      expect(mockProductModel.create).not.toHaveBeenCalled()
-      expect(mockProductModel.findOne).toHaveBeenCalled()
-      expect(doc.updateOne).toHaveBeenCalled()
+      expect(productModelMock.create).not.toHaveBeenCalled()
+      expect(productModelMock.findOne).toHaveBeenCalled()
+      expect(productModelMock.doc.updateOne).toHaveBeenCalled()
     })
 
     it('should update an already created product and update the productID', async () => {
-      let prodID = ''
-      const doc = {
-        ...ProductMock,
-        productID: 'someshort',
-        updateOne: jest
-          .fn()
-          .mockImplementation((item) => (prodID = item.productID)),
-      }
-
-      mockProductModel.findOne = jest.fn().mockResolvedValue(doc)
-      mockProductModel.create = jest.fn()
-
       await service.importProduct(QuikProducMock)
 
-      expect(mockProductModel.create).not.toHaveBeenCalled()
-      expect(mockProductModel.findOne).toHaveBeenCalled()
-      expect(doc.updateOne).toHaveBeenCalled()
+      const prodID = productModelMock.doc.updateOne.mock.calls[0][0].productID
+      expect(productModelMock.create).not.toHaveBeenCalled()
+      expect(productModelMock.findOne).toHaveBeenCalled()
+      expect(productModelMock.doc.updateOne).toHaveBeenCalled()
       expect(prodID).toEqual(QuikProducMock.productID)
     })
 
     it('should not update a main product if the infoming is a subproduct', async () => {
-      const doc = {
-        ...ProductMock,
-        updateOne: jest.fn(),
-      }
-
       const dto = { ...QuikProducMock, isSubproduct: true }
-
-      mockProductModel.findOne = jest.fn().mockResolvedValue(doc)
-      mockProductModel.create = jest.fn()
 
       await service.importProduct(dto)
 
-      expect(mockProductModel.create).not.toHaveBeenCalled()
-      expect(mockProductModel.findOne).toHaveBeenCalled()
-      expect(doc.updateOne).not.toHaveBeenCalled()
+      expect(productModelMock.create).not.toHaveBeenCalled()
+      expect(productModelMock.findOne).toHaveBeenCalled()
+      expect(productModelMock.doc.updateOne).not.toHaveBeenCalled()
     })
   })
 
   describe('#importSubproducts', () => {
     it('should add all options as products', async () => {
-      mockProductModel.findOne = jest.fn().mockResolvedValue(null)
-      mockProductModel.create = jest.fn().mockImplementation((item) => item)
+      productModelMock.findOne = jest.fn().mockResolvedValue(null)
       mockOptionModel.mockImplementation((item) => ({
         type: item.type,
         label: item.label,
@@ -240,6 +186,9 @@ describe('ProductsService', () => {
       }))
 
       const res = await service.importSubproducts(QuikProducMock.options[0])
+
+      expect(productModelMock.create).toHaveBeenCalledTimes(4)
+      expect(mockOptionModel).toHaveBeenCalled()
 
       expect(res).toHaveProperty('type', 'checkbox')
       expect(res).toHaveProperty('label', 'Extras de la Burger')
@@ -252,9 +201,7 @@ describe('ProductsService', () => {
 
   describe('#clear', () => {
     it('should run', async () => {
-      mockProductModel.deleteMany = jest.fn()
-
-      await service.clear()
+      productModelMock.deleteMany = jest.fn()
     })
   })
 })

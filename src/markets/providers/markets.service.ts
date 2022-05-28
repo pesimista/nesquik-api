@@ -31,12 +31,12 @@ export class MarketsService {
     let doc
     if (marketID.length === 24) {
       this.logger.info('searching market by doc.id', { marketID })
-      doc = await this.model.findById(marketID)
+      doc = await this.model.findById(marketID).populate('categories')
     }
 
     if (!doc) {
       this.logger.info('searching market by doc.marketID', { marketID })
-      doc = await this.model.findOne({ marketID })
+      doc = await this.model.findOne({ marketID }).populate('categories')
     }
 
     return doc
