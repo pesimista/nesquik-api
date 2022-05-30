@@ -122,7 +122,6 @@ describe('ProductsController - Integration', () => {
       expect(res.status).toEqual(404)
       expect(res.body).toHaveProperty('statusCode', 404)
       expect(res.body).toHaveProperty('message', 'Product not found')
-      expect(res.body).toHaveProperty('error', 'Not Found')
     })
   })
 
@@ -182,7 +181,6 @@ describe('ProductsController - Integration', () => {
         'message',
         'Market not found for this product'
       )
-      expect(res.body).toHaveProperty('error', 'Bad Request')
     })
   })
 })

@@ -2,32 +2,19 @@ import { HttpException, HttpStatus } from '@nestjs/common'
 import { getModelToken } from '@nestjs/mongoose'
 import { Test, TestingModule } from '@nestjs/testing'
 import { fail } from 'assert'
-import { Model } from 'mongoose'
+import { CategoryMock } from '../../../test/mocks/categories.mock'
 import { LoggerMock } from '../../../test/mocks/logger.mock'
 import { MarketMock, QuikMarketMock } from '../../../test/mocks/market.mock'
-import {
-  Category,
-  CategoryDocument,
-} from '../../utils/schemas/categories.schema'
+import { ModelMock, ModelMockType } from '../../../test/mocks/mongoose.mock'
 import { Banner } from '../../utils/schemas/banners.schema'
-import { PostMarketDto } from '../dto/postMarket.dto'
-import { Market, MarketDocument } from '../../utils/schemas/market.schema'
+import { Category } from '../../utils/schemas/categories.schema'
+import { Market } from '../../utils/schemas/market.schema'
 import { MarketsService } from './markets.service'
-
-type MarketModel = Model<MarketDocument>
-type CategoryModel = Model<CategoryDocument>
 
 describe('MarketsService', () => {
   let service: MarketsService
-  let mockMarketModel: MarketModel
-  let mockCategoryModel: CategoryModel
-  let mockBannerModel: jest.Mock
-
-  const ModelMock = {
-    ...Model,
-    find: jest.fn(),
-    create: jest.fn(),
-  }
+  let marketModelMock: ModelMockType
+  let bannerModelMock: jest.Mock
 
   beforeEach(async () => {
     jest.clearAllMocks()
@@ -38,11 +25,11 @@ describe('MarketsService', () => {
         { provide: 'winston', useValue: LoggerMock },
         {
           provide: getModelToken(Market.name),
-          useValue: ModelMock,
+          useValue: ModelMock([MarketMock]),
         },
         {
           provide: getModelToken(Category.name),
-          useValue: ModelMock,
+          useValue: ModelMock([CategoryMock]),
         },
         {
           provide: getModelToken(Banner.name),
@@ -52,9 +39,8 @@ describe('MarketsService', () => {
     }).compile()
 
     service = module.get<MarketsService>(MarketsService)
-    mockMarketModel = module.get<MarketModel>(getModelToken(Market.name))
-    mockCategoryModel = module.get<CategoryModel>(getModelToken(Category.name))
-    mockBannerModel = module.get<jest.Mock>(getModelToken(Banner.name))
+    marketModelMock = module.get<ModelMockType>(getModelToken(Market.name))
+    bannerModelMock = module.get<jest.Mock>(getModelToken(Banner.name))
   })
 
   it('should be defined', () => {
@@ -65,14 +51,14 @@ describe('MarketsService', () => {
     it('should call the right methods', async () => {
       const query = {
         populate: jest.fn().mockReturnThis(),
-        sort: jest.fn().mockResolvedValue([]),
+        sort: jest.fn().mockReturnValue(marketModelMock.collection),
       }
 
-      mockMarketModel.find = jest.fn().mockReturnValue(query)
+      marketModelMock.find = jest.fn().mockReturnValue(query)
 
       await service.getAllMarkets()
 
-      expect(mockMarketModel.find).toHaveBeenCalled()
+      expect(marketModelMock.find).toHaveBeenCalled()
       expect(query.populate).toHaveBeenCalledWith('categories')
       expect(query.sort).toHaveBeenCalled()
     })
@@ -103,41 +89,29 @@ describe('MarketsService', () => {
 
   describe('#getSingle', () => {
     it('should find the doc by id', async () => {
-      const market = {
-        id: 'marketID',
-        name: 'Pizza Hut',
-      }
-
-      const findByIdSpy = jest
-        .spyOn(mockMarketModel, 'findById')
-        .mockResolvedValue(market)
-      const findOneSpy = jest.spyOn(mockMarketModel, 'findOne')
-
       try {
-        const res = await service.getSingle('626a374e48d953beb475a2e4')
-        expect(findByIdSpy).toHaveBeenCalledWith('626a374e48d953beb475a2e4')
-        expect(findOneSpy).not.toHaveBeenCalled()
-        expect(res).toEqual(market)
+        const res = await service.getSingle(MarketMock.id)
+
+        expect(marketModelMock.findById).toHaveBeenCalledWith(MarketMock.id)
+        expect(marketModelMock.findOne).not.toHaveBeenCalled()
+
+        expect(res).toHaveProperty('id', MarketMock.id)
+        expect(res).toHaveProperty('marketID', MarketMock.marketID)
       } catch (error) {
         fail(`unexpected code path: ${error.message}`)
       }
     })
 
     it('should find the doc by id', async () => {
-      const market = {
-        id: 'anotherID',
-        marketID: 'marketID',
-        name: 'Pizza Hut',
-      }
-
-      const findOneSpy = jest
-        .spyOn(mockMarketModel, 'findOne')
-        .mockResolvedValue(market)
-
       try {
-        const res = await service.getSingle('marketID')
-        expect(findOneSpy).toHaveBeenCalledWith({ marketID: 'marketID' })
-        expect(res).toEqual(market)
+        const res = await service.getSingle(MarketMock.marketID)
+        expect(marketModelMock.findById).not.toHaveBeenCalled()
+        expect(marketModelMock.findOne).toHaveBeenCalledWith({
+          marketID: MarketMock.marketID,
+        })
+
+        expect(res).toHaveProperty('id', MarketMock.id)
+        expect(res).toHaveProperty('marketID', MarketMock.marketID)
       } catch (error) {
         fail(`unexpected code path: ${error.message}`)
       }
@@ -146,7 +120,7 @@ describe('MarketsService', () => {
 
   describe('#parseQuikMaket', () => {
     it('should throw an error if the marketID is already registered', async () => {
-      mockBannerModel.mockImplementation((item) => item)
+      bannerModelMock.mockImplementation((item) => item)
 
       const market = QuikMarketMock
       const hourSpy = jest.spyOn(service, 'getFullHour')
@@ -174,7 +148,7 @@ describe('MarketsService', () => {
         expect(res).not.toHaveProperty('categories')
         expect(res).toHaveProperty('schedule')
 
-        expect(mockBannerModel).toHaveBeenCalledTimes(market.marketing.length)
+        expect(bannerModelMock).toHaveBeenCalledTimes(market.marketing.length)
         expect(hourSpy).toHaveBeenCalledTimes(market.schedule.length * 2)
       } catch (error) {
         fail(`unexpected code path: ${error.message}`)
@@ -184,53 +158,36 @@ describe('MarketsService', () => {
 
   describe('#importedMarket', () => {
     it('should update the market', async () => {
-      const doc = { updateOne: jest.fn() }
       const market = QuikMarketMock
-
-      jest.spyOn(mockMarketModel, 'findOne').mockResolvedValue(doc)
-      jest.spyOn(service, 'parseQuikMaket').mockResolvedValue({
-        marketID: market.marketID,
-      })
 
       await service.importMarket(market)
 
-      expect(doc.updateOne).toHaveBeenCalled()
-      expect(mockMarketModel.create).not.toHaveBeenCalled()
+      expect(marketModelMock.doc.updateOne).toHaveBeenCalled()
+      expect(marketModelMock.create).not.toHaveBeenCalled()
     })
 
-    it('should update the market', async () => {
+    it('should create the market', async () => {
       const market = QuikMarketMock
-      const doc = { updateOne: jest.fn() }
-
-      jest.spyOn(mockMarketModel, 'create').mockImplementation(() => doc)
-      jest.spyOn(mockMarketModel, 'findById').mockResolvedValue(null)
-      jest.spyOn(mockMarketModel, 'findOne').mockResolvedValue(null)
-      jest.spyOn(service, 'parseQuikMaket').mockResolvedValue({
-        marketID: market.marketID,
-      })
+      marketModelMock.findOne = jest
+        .fn()
+        .mockReturnValue({ populate: () => null })
 
       await service.importMarket(market)
 
-      expect(mockMarketModel.create).toHaveBeenCalled()
-      expect(doc.updateOne).not.toHaveBeenCalled()
+      expect(marketModelMock.create).toHaveBeenCalled()
+      expect(marketModelMock.doc.updateOne).not.toHaveBeenCalled()
     })
   })
 
   describe('#createMarket', () => {
     it('should throw an error if the marketID is registered', async () => {
-      const doc = { updateOne: jest.fn() }
       const market = MarketMock
-
-      jest.spyOn(mockMarketModel, 'findOne').mockResolvedValue(doc)
-      const createSpy = jest
-        .spyOn(mockMarketModel, 'create')
-        .mockImplementation(() => doc)
 
       try {
         await service.createMarket(market)
         fail('unexpected code path')
       } catch (error) {
-        expect(createSpy).not.toHaveBeenCalled()
+        expect(marketModelMock.create).not.toHaveBeenCalled()
         expect(error).toBeInstanceOf(HttpException)
         expect(error.status).toEqual(HttpStatus.CONFLICT)
         expect(error.message).toEqual(
@@ -241,23 +198,15 @@ describe('MarketsService', () => {
 
     it('call the right methods and create a new marker document', async () => {
       const market = MarketMock
-      const doc = { update: jest.fn() }
-
-      jest.spyOn(mockCategoryModel, 'findById').mockResolvedValue(null)
-      jest.spyOn(mockMarketModel, 'findById').mockResolvedValue(null)
-      jest.spyOn(mockMarketModel, 'findOne').mockResolvedValue(null)
-      const createSpy = jest
-        .spyOn(mockMarketModel, 'create')
-        .mockImplementation((item: PostMarketDto) => ({
-          ...doc,
-          marketID: item.marketID,
-        }))
+      marketModelMock.findOne = jest
+        .fn()
+        .mockReturnValue({ populate: () => null })
 
       try {
         const doc = await service.createMarket(market)
 
         expect(doc).toHaveProperty('marketID', market.marketID)
-        expect(createSpy).toHaveBeenCalled()
+        expect(marketModelMock.create).toHaveBeenCalled()
       } catch (error) {
         fail(`unexpected code path: ${error.message}`)
       }

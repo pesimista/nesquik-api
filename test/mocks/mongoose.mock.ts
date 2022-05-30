@@ -11,7 +11,7 @@ export const ModelMock = (docs: any[]): Partial<ModelMockType> => {
     update: jest.fn(),
     updateOne: jest.fn(),
     save: jest.fn(),
-    toJson: () => item,
+    toJSON: () => item,
   }))
 
   const doc = {

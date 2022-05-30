@@ -2,19 +2,20 @@ import {
   Body,
   Controller,
   Get,
-  NotFoundException,
+  HttpException,
+  HttpStatus,
   Param,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common'
+import { AppConfigService } from '../../config/providers/configuration.service'
+import { MarketsService } from '../../markets/providers/markets.service'
+import { JwtAuthGuard } from '../../utils/guards/jwt-auth.guard'
+import { Category } from '../../utils/schemas/categories.schema'
 import { PostCategoryDto } from '../dto/postCategory.dto'
 import { CategoriesService } from '../providers/categories.service'
-import { Category } from '../../utils/schemas/categories.schema'
-import { AppConfigService } from '../../config/providers/configuration.service'
 import { FindMarketCategoriesResponse } from '../types/findMarketCategories.response'
-import { JwtAuthGuard } from '../../utils/guards/jwt-auth.guard'
-import { MarketsService } from '../../markets/providers/markets.service'
 
 @Controller('categories')
 export class CategoriesController {
@@ -53,7 +54,10 @@ export class CategoriesController {
       const doc = await this.service.getSingle(categoryID)
 
       if (!doc) {
-        throw new NotFoundException('Category with the given id not found')
+        throw new HttpException(
+          'Category with the given id not found',
+          HttpStatus.NOT_FOUND
+        )
       }
       return doc
     } catch (error) {

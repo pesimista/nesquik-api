@@ -1,9 +1,9 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
-  NotFoundException,
+  HttpException,
+  HttpStatus,
   Param,
   Post,
   Query,
@@ -12,6 +12,7 @@ import { CategoriesService } from '../../categories/providers/categories.service
 import { MarketsService } from '../../markets/providers/markets.service'
 import { CategoryDocument } from '../../utils/schemas/categories.schema'
 import { ProductDocument } from '../../utils/schemas/product.schema'
+import { ResponseList } from '../../utils/types/responseList'
 import { GetAllProductsDto } from '../dto/getProducts.dto'
 import { ProductsService } from '../providers/products.service'
 
@@ -24,9 +25,10 @@ export class ProductsController {
   ) {}
 
   @Get()
-  async findAll(@Query() query: GetAllProductsDto) {
+  async findAll(
+    @Query() query: GetAllProductsDto
+  ): Promise<ResponseList<ProductDocument>> {
     const items = await this.service.getAllProducts(query)
-
     return {
       count: items.length,
       items,
@@ -34,11 +36,11 @@ export class ProductsController {
   }
 
   @Get(':id')
-  async findProduct(@Param('id') productID) {
+  async findProduct(@Param('id') productID): Promise<ProductDocument> {
     const doc = await this.service.getSingle(productID)
 
     if (!doc) {
-      throw new NotFoundException('Product not found')
+      throw new HttpException('Product not found', HttpStatus.NOT_FOUND)
     }
 
     return doc
@@ -49,7 +51,10 @@ export class ProductsController {
     const market = await this.marketService.getSingle(dto.mainMarket)
 
     if (!market) {
-      throw new BadRequestException('Market not found for this product')
+      throw new HttpException(
+        'Market not found for this product',
+        HttpStatus.BAD_REQUEST
+      )
     }
 
     const categoriesP = dto.marketCategories.ids.map((id) =>

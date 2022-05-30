@@ -763,6 +763,8 @@ export const QuikMarketMock: QuikMarket = {
 }
 
 export const MarketMock: Market = {
+  id: '625b6efa6c494404777da8aa',
+  marketID: 'XAL9zcVqDlTWE9j98pbZ',
   address: 'C.C. Plaza 75, Calle 75 con Av. 3H',
   addressID: 'some',
   addressName: 'Av Milagro Edif Cotorrera antiguo coliseio pedro gamarro',
@@ -790,7 +792,6 @@ export const MarketMock: Market = {
   isOnlyQuik: true,
   isPremium: true,
   logo: 'https://firebasestorage.googleapis.com/v0/b/quik-test-d955c.appspot.com/o/test%2F1589076952763_tres-puntos.png?alt=media&token=ffc275ac-2326-490d-a202-ae8df92a82d6',
-  marketID: 'XAL9zcVqDlTWE9j98pbZ',
   marketing: [
     {
       image:

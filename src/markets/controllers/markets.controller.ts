@@ -11,6 +11,7 @@ import {
 import { CategoriesService } from '../../categories/providers/categories.service'
 import { JwtAuthGuard } from '../../utils/guards/jwt-auth.guard'
 import { Market } from '../../utils/schemas/market.schema'
+import { ResponseList } from '../../utils/types/responseList'
 import { ImportMarketDto } from '../dto/importMaket.dto'
 import { PostMarketDto } from '../dto/postMarket.dto'
 import { MarketsService } from '../providers/markets.service'
@@ -25,8 +26,13 @@ export class MarketsController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async findAll(): Promise<Market[]> {
-    return this.service.getAllMarkets()
+  async findAll(): Promise<ResponseList<Market>> {
+    const items = await this.service.getAllMarkets()
+
+    return {
+      count: items.length,
+      items,
+    }
   }
 
   @Get(':storeid')
