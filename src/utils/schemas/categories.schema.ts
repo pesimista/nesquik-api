@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import mongoose from 'mongoose'
 import { Document } from 'mongoose'
-import { MarketCategory as CategoryType } from 'nesquik-types'
+import { Category as CategoryType } from 'nesquik-types'
 import { Market } from './market.schema'
 import { SchemaOptions } from './schemas-options'
 

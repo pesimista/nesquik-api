@@ -26,8 +26,8 @@ Start issuing request to [http://localhost:3200](http://localhost:3200)
   - [X] Markets
   - [ ] Banners
   - [X] Categories
-  - [ ] Products
-  - [ ] Cart
+  - [X] Products
+  - [ ] Cart (WIP)
   - [ ] Orders
   - [ ] Transactions
 - [ ] Implement search

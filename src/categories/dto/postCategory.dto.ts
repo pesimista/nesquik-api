@@ -5,9 +5,9 @@ import {
   IsString,
   ValidateIf,
 } from 'class-validator'
-import { MarketCategory } from 'nesquik-types'
+import { Category } from 'nesquik-types'
 
-export class PostCategoryDto implements Partial<MarketCategory> {
+export class PostCategoryDto implements Partial<Category> {
   @ValidateIf((item) => !item.parent)
   @IsNotEmpty()
   @IsString()

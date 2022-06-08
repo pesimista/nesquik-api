@@ -1,6 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-
 import { Logger } from 'winston'
 import { QuikProduct } from '../../utils/quik-types'
 import { CategoryDocument } from '../../utils/schemas/categories.schema'
@@ -15,9 +14,14 @@ import {
 } from '../../utils/schemas/product.schema'
 import { GetAllProductsDto } from '../dto/getProducts.dto'
 import { ImportProductDto } from '../dto/importProduct.dto'
+import { PickProductDto } from '../dto/pickProduct.dto'
 
 @Injectable()
 export class ProductsService {
+  context = {
+    service: ProductsService.name,
+  }
+
   constructor(
     @Inject('winston') private logger: Logger,
     @InjectModel(Product.name) private productModel: ProductModel,
@@ -29,10 +33,12 @@ export class ProductsService {
     subproducts = false,
   }: GetAllProductsDto): Promise<ProductDocument[]> {
     const context = {
+      ...this.context,
       name: this.getAllProducts.name,
       market,
       subproducts,
     }
+
     const obj: { [key: string]: any } = { isSubproduct: subproducts }
 
     if (market) {
@@ -65,6 +71,90 @@ export class ProductsService {
     }
 
     return doc
+  }
+
+  async pickProduct(dto: PickProductDto): Promise<ProductDocument> {
+    const context = {
+      ...this.context,
+      name: this.pickProduct.name,
+      productID: dto.productID,
+    }
+
+    const product = await this.getSingle(dto.productID)
+
+    for (const option of product.options) {
+      const value = dto.options.find(
+        (item) => item.id === option._id.toString()
+      )
+
+      if (!value && option.required) {
+        this.logger.error('required option not selected on product, skipping', {
+          ...context,
+          optionID: option._id,
+          label: option.label,
+        })
+
+        throw new HttpException(
+          `Required option not selected: ${option.label} (${option._id})`,
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      if (!value) {
+        this.logger.warn('option not selected on product, skipping', {
+          ...context,
+          optionID: option._id,
+          label: option.label,
+        })
+        continue
+      }
+
+      // validate constraints
+      const quantity = value.selected.reduce(
+        (sum, current) => sum + current.quantity,
+        0
+      )
+
+      if (option.min < quantity || option.max > quantity) {
+        this.logger.error('selected option quantity out of bounds', {
+          ...context,
+          optionID: option._id,
+          label: option.label,
+        })
+
+        throw new HttpException(
+          `selected option quantity out of bounds: ${option.label} (${option._id}). Required: ${option.min}-${option.max}`,
+          HttpStatus.BAD_REQUEST
+        )
+      }
+
+      option.selected = value.selected
+    }
+
+    product.total = this.calculatePrice(product)
+    return product
+  }
+
+  calculatePrice(product: ProductDocument): number {
+    let total = product.price
+
+    for (const option of product.options) {
+      if (!option.usesPrice) {
+        continue
+      }
+
+      for (const selection of option.selected) {
+        const elements = option.elements as ProductDocument[]
+
+        const element = elements.find(
+          (item) => item._id.toString() === selection.elementID
+        )
+
+        total += element.price * selection.quantity
+      }
+    }
+
+    return parseFloat(total.toFixed(2))
   }
 
   formatProduct(dto: ImportProductDto): Partial<Product> {
@@ -101,6 +191,7 @@ export class ProductsService {
     options?: ProductOptionsDocument[]
   ): Promise<ProductDocument> {
     const context = {
+      ...this.context,
       name: this.importProduct.name,
       productID: dto.productID,
       productName: dto.name || dto.label,
@@ -138,6 +229,7 @@ export class ProductsService {
     marketID?: MarketDocument
   ): Promise<ProductOptionsDocument> {
     const context = {
+      ...this.context,
       name: this.importSubproducts.name,
       key: dto.key,
     }

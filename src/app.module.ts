@@ -4,6 +4,7 @@ import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose'
 import { utilities, WinstonModule } from 'nest-winston'
 import * as winston from 'winston'
 import { AuthModule } from './auth/auth.module'
+import { CartsModule } from './carts/carts.module'
 import { CategoriesModule } from './categories/categories.module'
 import { AppConfigModule } from './config/config.module'
 import { AppConfigService } from './config/providers/configuration.service'
@@ -16,7 +17,7 @@ import { ProductsModule } from './products/products.module'
     WinstonModule.forRoot({
       transports: [
         new winston.transports.Console({
-          level: 'info',
+          level: 'debug',
           format: winston.format.combine(
             winston.format.timestamp(),
             utilities.format.nestLike()
@@ -38,7 +39,7 @@ import { ProductsModule } from './products/products.module'
     ConfigModule,
     CategoriesModule,
     AuthModule,
+    CartsModule,
   ],
-  controllers: [],
 })
 export class AppModule {}

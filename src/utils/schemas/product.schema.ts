@@ -1,9 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import mongoose from 'mongoose'
-import { Document } from 'mongoose'
-import { Product as ProductType } from 'nesquik-types'
+import mongoose, { Document } from 'mongoose'
+import { OptionValues, Product as ProductType } from 'nesquik-types'
 import { Category } from './categories.schema'
-import { Market } from './market.schema'
+import { MarketDocument } from './market.schema'
 import { SchemaOptions } from './schemas-options'
 
 export type ProductDocument = Product & Document
@@ -23,10 +22,10 @@ export class ProductOption {
   @Prop({ type: Boolean })
   iterable: boolean
 
-  @Prop({ type: Number, default: 0 })
+  @Prop({ type: Number, default: 1 })
   min: number
 
-  @Prop({ type: Number, default: 0 })
+  @Prop({ type: Number, default: 1 })
   max: number
 
   @Prop({ type: Boolean })
@@ -39,12 +38,15 @@ export class ProductOption {
   // constraints
 
   @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }])
-  elements: Product[] | string[]
+  elements: ProductDocument[] | string[]
 
   @Prop([
     {
-      options: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-      values: { type: Number, default: 0 },
+      _id: false,
+      type: {
+        elementID: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+        quantity: { type: Number, default: 0 },
+      },
     },
   ])
   selected: OptionValues[]
@@ -62,7 +64,7 @@ export class Product implements Partial<ProductType> {
   rating: number
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Market' })
-  market: string | Market
+  market: string | MarketDocument
 
   @Prop({ type: Boolean, default: false })
   isExclusive: boolean
@@ -103,19 +105,20 @@ export class Product implements Partial<ProductType> {
   @Prop({ type: Number, default: 0 })
   promoValue: number
 
-  @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }])
+  @Prop({ type: Number, default: 0 })
+  quantity: number
+
+  @Prop({ type: Number, default: 0 })
+  total: number
+
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Category' })
   categories: Category[] | string[]
 
   @Prop({ type: Boolean, default: false })
   isPromo: boolean
 
   @Prop([{ type: ProductOption }])
-  options: ProductOption[]
-}
-
-export type OptionValues = {
-  optionID: string
-  values: number
+  options: ProductOptionsDocument[]
 }
 
 export const ProductOptionSchema = SchemaFactory.createForClass(ProductOption)
