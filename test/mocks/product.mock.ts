@@ -162,6 +162,8 @@ export const QuikProducMock: QuikProduct = {
 }
 
 export const ProductMock: Product = {
+  quantity: 0,
+  total: 0,
   id: '628a9cf2394fe060d9551635',
   isSubproduct: false,
   stock: 100,

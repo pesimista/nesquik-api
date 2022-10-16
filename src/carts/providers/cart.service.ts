@@ -1,14 +1,14 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { Injectable, Inject, HttpException, HttpStatus } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Logger } from 'winston'
 import {
   Cart,
-  CartDocument,
   CartModel,
   CartOrder,
   CartOrderModel,
-} from '../../../utils/schemas/carts.schema'
-import { ProductDocument } from '../../../utils/schemas/product.schema'
+  CartDocument,
+} from '../../utils/schemas/carts.schema'
+import { ProductDocument } from '../../utils/schemas/product.schema'
 
 @Injectable()
 export class CartService {

@@ -1,19 +1,11 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common'
-import { RequestJwt } from '../../../auth/types/request.type'
-import { PickProductDto } from '../../../products/dto/pickProduct.dto'
-import { ProductsService } from '../../../products/providers/products.service'
-import { JwtAuthGuard } from '../../../utils/guards/jwt-auth.guard'
-import { CartDocument } from '../../../utils/schemas/carts.schema'
-import { CartService } from '../../providers/cart/cart.service'
+import { Controller, Get, UseGuards, Req, Post, Body, Delete, Param } from "@nestjs/common"
+import { RequestJwt } from "../../auth/types/request.type"
+import { PickProductDto } from "../../products/dto/pickProduct.dto"
+import { ProductsService } from "../../products/providers/products.service"
+import { JwtAuthGuard } from "../../utils/guards/jwt-auth.guard"
+import { CartDocument } from "../../utils/schemas/carts.schema"
+import { CartService } from "../providers/cart.service"
+
 
 @Controller('cart')
 export class CartController {

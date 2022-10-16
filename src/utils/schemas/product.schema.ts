@@ -1,6 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import mongoose, { Document } from 'mongoose'
-import { OptionValues, Product as ProductType } from 'nesquik-types'
+import {
+  OptionValues,
+  Product as ProductType,
+  ProductOption as ProductOptionType,
+} from 'nesquik-types'
 import { Category } from './categories.schema'
 import { MarketDocument } from './market.schema'
 import { SchemaOptions } from './schemas-options'
@@ -12,7 +16,7 @@ export type OptionModel = mongoose.Model<ProductOptionsDocument>
 export type ProductModel = mongoose.Model<ProductDocument>
 
 @Schema(SchemaOptions)
-export class ProductOption {
+export class ProductOption implements Omit<ProductOptionType, 'elements'> {
   @Prop({ type: String })
   type: string
 
@@ -53,7 +57,7 @@ export class ProductOption {
 }
 
 @Schema(SchemaOptions)
-export class Product implements Partial<ProductType> {
+export class Product implements Omit<ProductType, 'options'> {
   @Prop({ type: Boolean, default: false })
   isSubproduct: boolean
 
@@ -118,7 +122,7 @@ export class Product implements Partial<ProductType> {
   isPromo: boolean
 
   @Prop([{ type: ProductOption }])
-  options: ProductOptionsDocument[]
+  options: Partial<ProductOptionsDocument>[]
 }
 
 export const ProductOptionSchema = SchemaFactory.createForClass(ProductOption)

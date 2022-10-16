@@ -69,6 +69,10 @@ describe('MarketsController - Integration', () => {
     await app.init()
   })
 
+  afterAll(async () => {
+    await app.close()
+  })
+
   it('should be defined', () => {
     expect(controller).toBeDefined()
   })

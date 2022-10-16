@@ -13,8 +13,9 @@ import {
   ProductOptionSchema,
   ProductSchema,
 } from '../utils/schemas/product.schema'
-import { CartController } from './controllers/cart/cart.controller'
-import { CartService } from './providers/cart/cart.service'
+import { CartController } from './controllers/cart.controller'
+import { CartService } from './providers/cart.service'
+
 
 @Module({
   imports: [
